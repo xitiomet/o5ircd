@@ -3,21 +3,18 @@
 
 # Configuration Options
 JC=gcj
-CLASS_PATH=src:ircd.jar
+CLASS_PATH=build:src
 JAR=jar
 JC_FLAGS=-d build
 
 # Where to begin....
-all: build ircd
-
-build:
-	mkdir build
+all: ircd
 
 # Executable Rule for GCJ
 # -------------------------------------------------------------------------------
 
 ircd: ircd.jar build/IrcServerBase.class
-	$(JC) $^ -O2 -fuse-boehm-gc --classpath=$(CLASS_PATH) --main=IrcServerBase -o $@
+	$(JC) $^ -O2 -fuse-boehm-gc --classpath=ircd.jar --main=IrcServerBase -o $@
 
 # Here are all the classes for the project
 # -------------------------------------------------------------------------------
@@ -62,30 +59,30 @@ build/org/openstatic/irc/middleware/StreamMiddlewareHandler.class: src/org/opens
 	$(JC) $(JC_FLAGS) --classpath=$(CLASS_PATH) -C $<
 
 build/org/openstatic/irc/middleware/JsonHttpCH.class: build/org/json/JSONArray.class build/org/json/JSONObject.class src/org/openstatic/irc/middleware/JsonHttpCH.java
-	$(JC) $(JC_FLAGS) --classpath=$(CLASS_PATH) -C $<
+	$(JC) $(JC_FLAGS) --classpath=$(CLASS_PATH) -C src/org/openstatic/irc/middleware/JsonHttpCH.java
 
 # This whole section is for building the json stuff!!!
 # -------------------------------------------------------------------------------
-build/org/json/JSONArray.class: build/org/json/JSONObject.class src/org/json/JSONArray.java
-	$(JC) $(JC_FLAGS) --classpath=$(CLASS_PATH) -C $<
+build/org/json/JSONArray.class: src/org/json/JSONArray.java build/org/json/JSONObject.class
+	$(JC) $(JC_FLAGS) -w --classpath=$(CLASS_PATH) -C $<
 
 build/org/json/JSONException.class: src/org/json/JSONException.java
-	$(JC) $(JC_FLAGS) --classpath=$(CLASS_PATH) -C $<
+	$(JC) $(JC_FLAGS) -w --classpath=$(CLASS_PATH) -C $<
 
-build/org/json/JSONObject.class: build/org/json/JSONException.class build/org/json/JSONTokener.class build/org/json/JSONString.class src/org/json/JSONObject.java
-	$(JC) $(JC_FLAGS) --classpath=$(CLASS_PATH) -C $<
+build/org/json/JSONObject.class: src/org/json/JSONObject.java build/org/json/JSONException.class build/org/json/JSONTokener.class build/org/json/JSONString.class
+	$(JC) $(JC_FLAGS) -w --classpath=$(CLASS_PATH) -C $<
 
 build/org/json/JSONString.class: src/org/json/JSONString.java
-	$(JC) $(JC_FLAGS) --classpath=$(CLASS_PATH) -C $<
+	$(JC) $(JC_FLAGS) -w --classpath=$(CLASS_PATH) -C $<
 
 build/org/json/JSONStringer.class: src/org/json/JSONStringer.java
-	$(JC) $(JC_FLAGS) --classpath=$(CLASS_PATH) -C $<
+	$(JC) $(JC_FLAGS) -w --classpath=$(CLASS_PATH) -C $<
 
-build/org/json/JSONTokener.class: build/org/json/JSONException.class src/org/json/JSONTokener.java
-	$(JC) $(JC_FLAGS) --classpath=$(CLASS_PATH) -C $<
+build/org/json/JSONTokener.class: src/org/json/JSONTokener.java build/org/json/JSONException.class
+	$(JC) $(JC_FLAGS) -w --classpath=$(CLASS_PATH) -C $<
 
-build/org/json/JSONWriter.class: build/org/json/JSONObject.class src/org/json/JSONWriter.java
-	$(JC) $(JC_FLAGS) --classpath=$(CLASS_PATH) -C $<
+build/org/json/JSONWriter.class: src/org/json/JSONWriter.java build/org/json/JSONObject.class
+	$(JC) $(JC_FLAGS) -w --classpath=$(CLASS_PATH) -C $<
 
 # Main Builds
 # -------------------------------------------------------------------------------
@@ -95,9 +92,5 @@ ircd.jar: build/org/openstatic/irc/IrcServer.class build/org/openstatic/irc/Rece
 
 clean:
 	rm -fR build
-	rm -f src/org/openstatic/irc/*.class
-	rm -f src/org/openstatic/irc/middleware/*.class
-	rm -f src/org/openstatic/irc/gateways/*.class
-	rm -f src/*.class
 	rm -f ircd
 	rm -f ircd.jar
