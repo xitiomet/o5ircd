@@ -1,0 +1,11 @@
+syntax: glob
+*.class
+*~
+*.rej
+*.orig
+build
+jvm-build
+
+syntax: regexp
+(.*/)?\#[^/]*\#$
+
