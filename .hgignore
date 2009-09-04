@@ -5,6 +5,8 @@ syntax: glob
 *.orig
 build
 jvm-build
+ircd
+ircd.jar
 
 syntax: regexp
 (.*/)?\#[^/]*\#$

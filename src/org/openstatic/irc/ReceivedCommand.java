@@ -7,7 +7,6 @@ public class ReceivedCommand
 {
     protected String cmd;
     protected String source;
-    private boolean arg_end;
     protected Vector<String> args;
     protected Vector<String> destination;
     
@@ -32,7 +31,6 @@ public class ReceivedCommand
     {
         this.cmd = cmd;
         this.args = new Vector<String>();
-        this.arg_end = false;
         this.source = source;
         this.destination = null;
     }
@@ -41,7 +39,6 @@ public class ReceivedCommand
     {
         this.cmd = cmd;
         this.args = new Vector<String>();
-        this.arg_end = false;
         this.source = source.toString();
         this.destination = null;
     }
@@ -49,16 +46,7 @@ public class ReceivedCommand
     // add arg for command handler recreation
     public void addArg(String value)
     {
-        if (!arg_end)
-        {
-            if (value.contains(" "))
-            {
-                this.args.add(":" + value);
-                this.arg_end = true;
-            } else {
-                this.args.add(value);
-            }
-        }
+        this.args.add(value);
     }
     
     // process that funny argument layout
