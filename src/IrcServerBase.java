@@ -5,6 +5,7 @@ import org.openstatic.irc.ReceivedCommand;
 import org.openstatic.irc.PreparedCommand;
 import org.openstatic.irc.middleware.JsonHttpCH;
 import org.openstatic.irc.gateways.IrcGateway;
+import org.openstatic.irc.gateways.WebAdminGateway;
 import java.io.File;
 import java.net.URL;
 import java.io.InputStreamReader;
@@ -114,6 +115,15 @@ public class IrcServerBase
                 {
                     IrcChannel chan = new IrcChannel(arg_p1);
                     irc.addChannel(chan);
+                }
+                
+                if (arg.equals("--web") && arg_p1 != null)
+                {
+                    try
+                    {
+                        int web_port = Integer.valueOf(arg_p1).intValue();
+                        irc.addGateway(new WebAdminGateway(web_port));
+                    } catch (Exception wa) {}
                 }
                 
                 if (arg.equals("--json-chan") && arg_p1 != null && arg_p2 != null)
