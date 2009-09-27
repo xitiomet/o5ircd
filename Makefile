@@ -10,6 +10,11 @@ JC_FLAGS=-d build
 # Where to begin....
 all: ircd
 
+jvm:
+	mkdir jvm-build
+	javac -cp lib/json-gcj.jar:lib/placebohttp.jar -d jvm-build src/IrcServerBase.java src/org/openstatic/irc/*.java src/org/openstatic/irc/gateways/*.java src/org/openstatic/irc/middleware/*.java
+	jar -cvf jvm-osircd.jar -C jvm-build org
+
 # Executable Rule for GCJ
 # -------------------------------------------------------------------------------
 # check it, the ordering of the jar files in gcj is important. Each dependency should be included before any lib that requires it
@@ -78,3 +83,5 @@ clean:
 	rm -fR build
 	rm -f ircd
 	rm -f ircd.jar
+	rm -f jvm-osircd.jar
+	rm -fR jvm-build
