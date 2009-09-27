@@ -4,14 +4,15 @@ import org.openstatic.irc.IrcServer;
 import org.openstatic.irc.IrcUser;
 import org.openstatic.irc.Gateway;
 
-import java.net.ServerSocket;
-import java.net.Socket;
+import org.openstatic.http.PlaceboHttpServer;
+import org.openstatic.http.PlaceboSession;
 
 public class WebAdminGateway extends Thread implements Gateway
 {
     private int port;
     private boolean keep_running;
     private IrcServer ircServer;
+    private PlaceboHttpServer httpServer;
     
     public WebAdminGateway(int port)
     {
@@ -45,20 +46,21 @@ public class WebAdminGateway extends Thread implements Gateway
     
     public void run()
     {
-        ServerSocket ss = null;
-        try
-        {
-            ss = new ServerSocket(this.port);
-        } catch (Exception n) {}
+        httpServer = new PlaceboHttpServer(this.port);
         while(this.keep_running)
         {
             try
             {
-                Socket new_connection = ss.accept();
+                PlaceboSession new_connection = httpServer.getNextSession();
                 WebAdminGatewayConnection wagc = new WebAdminGatewayConnection(new_connection, this.ircServer);
                 wagc.start();
             } catch (Exception x) {}
         }
         ircServer.logln("PORT: " + String.valueOf(this.port), "WebAdmin Gateway Shutdown");
+    }
+    
+    public String toString()
+    {
+        return "WebAdminGateway @ " + String.valueOf(this.port);
     }
 }

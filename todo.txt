@@ -1,5 +1,0 @@
-- Add connection interface system IrcServer class should have no knowledge of sockets, just IrcClientConnection(client) and IrcServerInterface(server)
-- Add Dynamic loading of gcjlib (for Interfaces and CommandHandlers)
-- Add configuration model
-- Add Http Gui for administration
-- Add COMMET Interface

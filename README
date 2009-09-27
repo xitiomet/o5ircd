@@ -1,0 +1,15 @@
+Openstatic.org IRC Server
+-------------------------
+
+Openstatic irc server is a new approach to irc. Every part of the system is layered.
+One of the strengths of this server is its middleware functionality for chatrooms.
+Each chatroom is treated like an object and can route its traffic through any number
+of middleware classes. This allows each chatroom to act like its own mini-server.
+
+In order to compile the server you will need to do the following on debian based systems
+
+$ sudo apt-get install gcj java-gcj-compat make
+
+then to compile just run make!
+
+This readme is a work in progress. More to come.
