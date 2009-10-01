@@ -9,6 +9,7 @@ public class IrcUser extends Thread
     private String nickname;
     private String realname;
     private String away_message;
+    private String password;
     private boolean welcomed;
     private int idle_time;
     private boolean stay_connected;
@@ -388,13 +389,22 @@ public class IrcUser extends Thread
         this.connection.sendResponse(response, args);
     }
     
-    public void processUser(Vector<String> args)
+    private void processUser(Vector<String> args)
     {
         if (args.size() == 4)
         {
             this.username = args.elementAt(0);
             this.realname = args.elementAt(3);
         }
+    }
+    
+    public void loginUser(String username, String password)
+    {
+        this.server.logln(this.connection.getClientHostname(), "IrcUser Manual Authentication (" + username + ")");
+        this.username = username;
+        this.nickname = username;
+        this.password = password;
+        
     }
     
     public String toString()

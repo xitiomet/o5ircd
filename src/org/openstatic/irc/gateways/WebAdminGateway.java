@@ -1,7 +1,6 @@
 package org.openstatic.irc.gateways;
 
 import org.openstatic.irc.IrcServer;
-import org.openstatic.irc.IrcUser;
 import org.openstatic.irc.Gateway;
 
 import org.openstatic.http.PlaceboHttpServer;
@@ -47,6 +46,9 @@ public class WebAdminGateway extends Thread implements Gateway
     public void run()
     {
         httpServer = new PlaceboHttpServer(this.port);
+        httpServer.setDebugStream(this.ircServer.getDebugStream());
+        httpServer.setDebug(this.ircServer.isDebug());
+        httpServer.start();
         while(this.keep_running)
         {
             try
