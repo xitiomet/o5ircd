@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Properties;
 
 public class TwitterMiddlewareHandler implements MiddlewareHandler
 {
@@ -20,14 +21,45 @@ public class TwitterMiddlewareHandler implements MiddlewareHandler
     private String twitter_topic;
     private Thread read_twitter;
     
-    public TwitterMiddlewareHandler(String twitter_topic, String privmsg_to, String twitter_username, String twitter_password)
+    public TwitterMiddlewareHandler(Properties setup)
     {
         
         this.middlewareHandler = null;
-        this.privmsg_to = privmsg_to;
-        this.twitter_topic = twitter_topic;
-        this.twitter_username = twitter_username;
-        this.twitter_password = twitter_password;
+        this.privmsg_to = setup.getProperty("channel_name");
+        this.twitter_topic = setup.getProperty("twitter_topic");
+        this.twitter_username = setup.getProperty("twitter_username");
+        this.twitter_password = setup.getProperty("twitter_password");
+        read_twitter = new Thread()
+        {
+            public void run()
+            {
+                try
+                {
+                    String url = "http://stream.twitter.com/1/statuses/filter.json?track=" + URLEncoder.encode(TwitterMiddlewareHandler.this.twitter_topic, "UTF-8");
+                    HttpURLConnection twitter_connection = authenticate(url, TwitterMiddlewareHandler.this.twitter_username, TwitterMiddlewareHandler.this.twitter_password);
+                    BufferedReader bread = new BufferedReader(new InputStreamReader(twitter_connection.getInputStream()));
+                    String newLine = null;
+                    do
+                    {
+                        newLine = bread.readLine();
+                        try
+                        {
+                            JSONObject tweet = new JSONObject(newLine);
+                            String message = tweet.getString("text");
+                            JSONObject user = tweet.getJSONObject("user");
+                            String username = user.getString("screen_name");
+                            String raw_irc = ":" + username + "!" + username + "@twitter.com PRIVMSG " + TwitterMiddlewareHandler.this.privmsg_to + " :" + message;
+                            ReceivedCommand rc = new ReceivedCommand(raw_irc);
+                            TwitterMiddlewareHandler.this.middlewareHandler.onCommand(rc, TwitterMiddlewareHandler.this);
+                        } catch (Exception ve) {}
+                    } while (newLine != null);
+                    bread.close();
+                    
+                } catch (Exception nex) {
+                    System.err.println("Twitter Middleware Failed: " + nex.getMessage());
+                }
+            }
+        };
     }
     
     public static HttpURLConnection authenticate(String url, String username, String password) throws Exception
@@ -43,40 +75,9 @@ public class TwitterMiddlewareHandler implements MiddlewareHandler
     public void onCommand(ReceivedCommand command, MiddlewareHandler middlewareHandler)
     {
         middlewareHandler.onCommand(command, this);
-        if (this.middlewareHandler == null)
+        if (this.middlewareHandler == null || read_twitter.isAlive() == false)
         {
             this.middlewareHandler = middlewareHandler;
-            read_twitter = new Thread()
-            {
-                public void run()
-                {
-                    try
-                    {
-                        String url = "http://stream.twitter.com/1/statuses/filter.json?track=" + URLEncoder.encode(TwitterMiddlewareHandler.this.twitter_topic, "UTF-8");
-                        HttpURLConnection twitter_connection = authenticate(url, TwitterMiddlewareHandler.this.twitter_username, TwitterMiddlewareHandler.this.twitter_password);
-                        BufferedReader bread = new BufferedReader(new InputStreamReader(twitter_connection.getInputStream()));
-                        String newLine = null;
-                        do
-                        {
-                            newLine = bread.readLine();
-                            try
-                            {
-                                JSONObject tweet = new JSONObject(newLine);
-                                String message = tweet.getString("text");
-                                JSONObject user = tweet.getJSONObject("user");
-                                String username = user.getString("screen_name");
-                                String raw_irc = ":" + username + "!" + username + "@twitter.com PRIVMSG " + TwitterMiddlewareHandler.this.privmsg_to + " :" + message;
-                                ReceivedCommand rc = new ReceivedCommand(raw_irc);
-                                TwitterMiddlewareHandler.this.middlewareHandler.onCommand(rc, TwitterMiddlewareHandler.this);
-                            } catch (Exception ve) {}
-                        } while (newLine != null);
-                        bread.close();
-                        
-                    } catch (Exception nex) {
-                        System.err.println("Twitter Middleware Failed: " + nex.getMessage());
-                    }
-                }
-            };
             read_twitter.start();
         }
     }

@@ -3,14 +3,14 @@ import org.openstatic.irc.IrcUser;
 import org.openstatic.irc.IrcChannel;
 import org.openstatic.irc.ReceivedCommand;
 import org.openstatic.irc.PreparedCommand;
-import org.openstatic.irc.middleware.JsonHttpCH;
-import org.openstatic.irc.middleware.TwitterMiddlewareHandler;
 import org.openstatic.irc.gateways.IrcGateway;
 import org.openstatic.irc.gateways.WebAdminGateway;
 import java.io.File;
-import java.net.URL;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.util.Properties;
+
 //import org.openstatic.irc.middleware.DefaultMiddlewareHandler;
 
 public class IrcServerBase
@@ -22,13 +22,27 @@ public class IrcServerBase
         System.err.println("  --debug                        Turn debugging output on.");
         System.err.println("  --irc-port [port]              Specify IRC listening port");
         System.err.println("  --web [port]                   Start web administration on given port");
-        System.err.println("  --twitter-chan ...             Start web administration on given port");
+        System.err.println("  --complex-chan [ini]           Create a channel from an ini file");
         System.err.println("  --chan [channel name]          create chanel (can be used multiple times)");
-        System.err.println("  --json-chan [chan] [url]       create channel using json/http middleware");
         System.err.println("  --motd [file]                  specify the motd filename");
         System.err.println("  --help                         display this menu");
         System.err.println("");
         System.err.println("");
+    }
+    
+    public static Properties loadProperties(String filename)
+    {
+        try
+        {
+            File load_file = new File(filename);
+            Properties props = new Properties();
+            FileInputStream fis = new FileInputStream(load_file);
+            props.load(fis);
+            fis.close();
+            return props;
+        } catch (Exception e) {
+            return new Properties();
+        }
     }
     
     // Sloppy function for sending messages from the CLI
@@ -129,17 +143,10 @@ public class IrcServerBase
                     } catch (Exception wa) {}
                 }
                 
-                if (arg.equals("--json-chan") && arg_p1 != null && arg_p2 != null)
+                if (arg.equals("--complex-chan") && arg_p1 != null)
                 {
-                    IrcChannel chan = new IrcChannel(arg_p1, new JsonHttpCH(new URL(arg_p2), 10));
+                    IrcChannel chan = new IrcChannel(loadProperties(arg_p1));
                     irc.addChannel(chan);
-                }
-
-                if (arg.equals("--twitter-chan") && arg_p1 != null && arg_p2 != null)
-                {
-                    IrcChannel chan = new IrcChannel(arg_p1, new TwitterMiddlewareHandler(arg_p2, arg_p1, "zander_xi01", "zander1032"));
-                    irc.addChannel(chan);
-                    System.err.println("Twitter");
                 }
                 
                 if (arg.equals("--motd") && arg_p1 != null)
@@ -184,6 +191,17 @@ public class IrcServerBase
                         IrcChannel chan = new IrcChannel(cmd_ary[1]);
                         irc.addChannel(chan);
                         System.out.println("Created Channel \"" + chan.toString() + "\"");
+                    }
+                    
+                    if (cmd_ary[0].equals("load"))
+                    {
+                        Properties l = loadProperties(cmd_ary[1]);
+                        if ("channel".equals(l.getProperty("config")))
+                        {
+                            IrcChannel chan = new IrcChannel(l);
+                            irc.addChannel(chan);
+                            System.out.println("Created Channel \"" + chan.toString() + "\"");
+                        }
                     }
                     
                     if (cmd_ary[0].equals("notice"))

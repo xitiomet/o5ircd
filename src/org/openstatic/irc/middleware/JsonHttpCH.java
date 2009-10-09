@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.Properties;
 
 public class JsonHttpCH implements MiddlewareHandler
 {
@@ -19,11 +20,14 @@ public class JsonHttpCH implements MiddlewareHandler
     private int polling_cycle;
     private MiddlewareHandler middlewareHandler;
 
-    public JsonHttpCH(URL url, int polling_cycle)
+    public JsonHttpCH(Properties setup)
     {
-        this.url = url;
+        try
+        {
+            this.url = new URL(setup.getProperty("url"));
+        } catch (Exception n) {}
         this.polling_time = 0;
-        this.polling_cycle = polling_cycle;
+        this.polling_cycle = Integer.valueOf(setup.getProperty("polling_cycle")).intValue();
         this.middlewareHandler = null;
         if (polling_cycle > 0)
         {

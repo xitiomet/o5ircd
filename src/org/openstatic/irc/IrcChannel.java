@@ -3,6 +3,8 @@ package org.openstatic.irc;
 import java.util.Vector;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Properties;
+import java.lang.reflect.Constructor;
 
 public class IrcChannel implements MiddlewareHandler
 {
@@ -13,6 +15,27 @@ public class IrcChannel implements MiddlewareHandler
     
     private Vector<IrcUser> pending_joins;
     private MiddlewareHandler myHandler;
+    
+    public IrcChannel(Properties setup)
+    {
+        this.channel_name = setup.getProperty("channel_name");
+        this.topic = setup.getProperty("channel_topic");
+        this.myHandler = null;
+        if (setup.getProperty("middleware") != null)
+        {
+            try
+            {
+                Class<?> c = Class.forName(setup.getProperty("middleware"));
+                Constructor<?> cons = c.getDeclaredConstructor(Properties.class);
+                this.myHandler = (MiddlewareHandler) cons.newInstance(setup);
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+            }
+        }
+        this.members = new Vector<IrcUser>();
+        this.pending_joins = new Vector<IrcUser>();
+        this.member_modes = new Hashtable<IrcUser, String>();
+    }
     
     public IrcChannel(String name)
     {
