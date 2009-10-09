@@ -4,6 +4,7 @@ import org.openstatic.irc.IrcChannel;
 import org.openstatic.irc.ReceivedCommand;
 import org.openstatic.irc.PreparedCommand;
 import org.openstatic.irc.middleware.JsonHttpCH;
+import org.openstatic.irc.middleware.TwitterMiddlewareHandler;
 import org.openstatic.irc.gateways.IrcGateway;
 import org.openstatic.irc.gateways.WebAdminGateway;
 import java.io.File;
@@ -20,6 +21,8 @@ public class IrcServerBase
         System.err.println("");
         System.err.println("  --debug                        Turn debugging output on.");
         System.err.println("  --irc-port [port]              Specify IRC listening port");
+        System.err.println("  --web [port]                   Start web administration on given port");
+        System.err.println("  --twitter-chan ...             Start web administration on given port");
         System.err.println("  --chan [channel name]          create chanel (can be used multiple times)");
         System.err.println("  --json-chan [chan] [url]       create channel using json/http middleware");
         System.err.println("  --motd [file]                  specify the motd filename");
@@ -130,6 +133,13 @@ public class IrcServerBase
                 {
                     IrcChannel chan = new IrcChannel(arg_p1, new JsonHttpCH(new URL(arg_p2), 10));
                     irc.addChannel(chan);
+                }
+
+                if (arg.equals("--twitter-chan") && arg_p1 != null && arg_p2 != null)
+                {
+                    IrcChannel chan = new IrcChannel(arg_p1, new TwitterMiddlewareHandler(arg_p2, arg_p1, "zander_xi01", "zander1032"));
+                    irc.addChannel(chan);
+                    System.err.println("Twitter");
                 }
                 
                 if (arg.equals("--motd") && arg_p1 != null)
