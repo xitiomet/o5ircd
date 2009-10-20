@@ -45,13 +45,14 @@ public class IrcUser extends Thread
             }
         };
         idleClock.start();
-        this.server.logln(this.connection.getClientHostname(), "IrcUser Class initGatewayConnection()");
+        this.server.log(this.connection.getClientHostname(), 1, "IrcUser Class initGatewayConnection()");
     }
     
     public void disconnect()
     {
-        this.server.logln(this.username, "IrcUser Class " + this.nickname + " disconnect()");
+        this.server.log(this.username, 1, "IrcUser Class " + this.nickname + " disconnect()");
         this.stay_connected = false;
+        this.connection.close();
         this.server.removeUser(this);
     }
     
@@ -226,8 +227,7 @@ public class IrcUser extends Thread
                 }
             }
         } else if (cmd.is("QUIT")) {
-            this.connection.close();
-            
+            this.disconnect();
         } else if (cmd.is("USER")) {
             this.processUser(cmd.getArgs());
         } else if (cmd.is("PONG")) {
@@ -400,7 +400,7 @@ public class IrcUser extends Thread
     
     public void loginUser(String username, String password)
     {
-        this.server.logln(this.connection.getClientHostname(), "IrcUser Manual Authentication (" + username + ")");
+        this.server.log(this.connection.getClientHostname(), 1, "IrcUser Manual Authentication (" + username + ")");
         this.username = username;
         this.nickname = username;
         this.password = password;

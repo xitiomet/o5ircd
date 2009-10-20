@@ -20,11 +20,13 @@ public class TwitterMiddlewareHandler implements MiddlewareHandler
     private String twitter_password;
     private String twitter_topic;
     private Thread read_twitter;
+    private boolean keep_running;
     
     public TwitterMiddlewareHandler(Properties setup)
     {
         
         this.middlewareHandler = null;
+        this.keep_running = true;
         this.privmsg_to = setup.getProperty("channel_name");
         this.twitter_topic = setup.getProperty("twitter_topic");
         this.twitter_username = setup.getProperty("twitter_username");
@@ -52,7 +54,7 @@ public class TwitterMiddlewareHandler implements MiddlewareHandler
                             ReceivedCommand rc = new ReceivedCommand(raw_irc);
                             TwitterMiddlewareHandler.this.middlewareHandler.onCommand(rc, TwitterMiddlewareHandler.this);
                         } catch (Exception ve) {}
-                    } while (newLine != null);
+                    } while (newLine != null && TwitterMiddlewareHandler.this.keep_running);
                     bread.close();
                     
                 } catch (Exception nex) {
@@ -80,6 +82,11 @@ public class TwitterMiddlewareHandler implements MiddlewareHandler
             this.middlewareHandler = middlewareHandler;
             read_twitter.start();
         }
+    }
+    
+    public void shutdown()
+    {
+        this.keep_running = false;
     }
     
     public IrcUser findMember(String value)

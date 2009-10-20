@@ -16,7 +16,7 @@ public class IrcServer extends Thread
     private Vector<IrcUser> users;
     private Vector<Gateway> gateways;
     private PrintStream debug_stream;
-    private boolean debug_mode;
+    private int debug_mode;
     private boolean keep_running;
     private int minute_tracker;
     private Vector<String> motd;
@@ -27,7 +27,7 @@ public class IrcServer extends Thread
         this.rooms = new Vector<IrcChannel>();
         this.users = new Vector<IrcUser>();
         this.gateways = new Vector<Gateway>();
-        this.debug_mode = false;
+        this.debug_mode = 0;
         this.debug_stream = System.err;
         this.keep_running = true;
         this.motd = null;
@@ -42,7 +42,7 @@ public class IrcServer extends Thread
             Gateway gate = e.nextElement();
             gate.initGateway(this);
         }
-        logln("SERVER", "Completed Init Gateway");
+        log("SERVER", 1, "Completed Init Gateway");
         while (this.keep_running)
         {
             try
@@ -56,13 +56,27 @@ public class IrcServer extends Thread
                 Thread.sleep(1000);
             } catch (Exception z) {}
         }
-        logln("SERVER", "Full Shutdown, killing gateways");
+        log("SERVER", 1, "Full Shutdown, killing gateways");
         for(Enumeration<Gateway> e2 = gateways.elements(); e2.hasMoreElements(); )
         {
             Gateway gate = e2.nextElement();
             gate.shutdownGateway();
         }
-        logln("SERVER", "Gatway Shutdown Complete!");
+        log("SERVER", 1, "Gatway Shutdown Complete!");
+        
+        log("SERVER", 1, "Killing User Connections");
+        for(Enumeration<IrcUser> e3 = users.elements(); e3.hasMoreElements(); )
+        {
+            IrcUser cu = e3.nextElement();
+            cu.disconnect();
+        }
+        
+        log("SERVER", 1, "Detaching Channels and Shutting Down Middleware");
+        for(Enumeration<IrcChannel> e4 = rooms.elements(); e4.hasMoreElements(); )
+        {
+            IrcChannel cc = e4.nextElement();
+            cc.shutdown();
+        }
     }
     
     public String getBootTime()
@@ -72,16 +86,16 @@ public class IrcServer extends Thread
     
     public void addGateway(Gateway g)
     {
-        logln("SERVER", "Gateway Added \"" + g.toString() + "\"");
+        log("SERVER", 1, "Gateway Added \"" + g.toString() + "\"");
         gateways.add(g);
     }
     
-    public void setDebug(boolean value)
+    public void setDebug(int value)
     {
         this.debug_mode = value;
     }
     
-    public boolean isDebug()
+    public int getDebug()
     {
         return this.debug_mode;
     }
@@ -96,19 +110,11 @@ public class IrcServer extends Thread
         return this.debug_stream;
     }
     
-    public void log(String caption, String msg)
+    public void log(String caption, int level, String msg)
     {
-        if (this.debug_mode)
+        if (this.debug_mode >= level)
         {
-            this.debug_stream.print("[ " + setSizedString(caption, 16) + " ] " + msg);
-        }
-    }
-    
-    public void logln(String caption, String msg)
-    {
-        if (this.debug_mode)
-        {
-            this.debug_stream.println("[ " + setSizedString(caption, 16) + " ] " + msg);
+            this.debug_stream.println("[ " + setSizedString(caption, 16) + " ] " + msg.trim());
         }
     }
     
@@ -158,7 +164,7 @@ public class IrcServer extends Thread
                 IrcChannel chan = e.nextElement();
                 chan.removeMember(conn);
             }
-            logln("SERVER", "Connection Removed \"" + conn.toString() + "\"");
+            log("SERVER", 1, "Connection Removed \"" + conn.toString() + "\"");
         }
     }
     
@@ -212,7 +218,7 @@ public class IrcServer extends Thread
             br = new BufferedReader(new FileReader(motd_file));
             while ((thisLine = br.readLine()) != null)
                 this.motd.add(thisLine);
-            logln("SERVER", "Loaded MOTD from file \"" + motd_file.toString() + "\"");
+            log("SERVER", 1, "Loaded MOTD from file \"" + motd_file.toString() + "\"");
         } catch (Exception ioe) {
             // who cares
         } finally {
@@ -235,11 +241,10 @@ public class IrcServer extends Thread
         return this.motd;
     }
     
-    
     public void addChannel(IrcChannel chan)
     {
         this.rooms.add(chan);
-        logln("SERVER", "Channel Added \"" + chan.getName() + "\"");
+        log("SERVER", 1, "Channel Added \"" + chan.getName() + "\"");
     }
     
     public Vector<IrcChannel> getChannels()

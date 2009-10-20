@@ -18,10 +18,11 @@ public class StreamingJsonMiddlewareHandler implements MiddlewareHandler
     private MiddlewareHandler middlewareHandler;
     private Properties setup;
     private Thread read_json;
+    private boolean keep_running;
     
     public StreamingJsonMiddlewareHandler(Properties setup)
     {
-        
+        this.keep_running = true;
         this.setup = setup;
         this.middlewareHandler = null;
         
@@ -60,7 +61,7 @@ public class StreamingJsonMiddlewareHandler implements MiddlewareHandler
                             ReceivedCommand rc = new ReceivedCommand(raw_irc);
                             StreamingJsonMiddlewareHandler.this.middlewareHandler.onCommand(rc, StreamingJsonMiddlewareHandler.this);
                         } catch (Exception ve) {}
-                    } while (newLine != null);
+                    } while (newLine != null && StreamingJsonMiddlewareHandler.this.keep_running);
                     bread.close();
                     
                 } catch (Exception nex) {
@@ -126,6 +127,11 @@ public class StreamingJsonMiddlewareHandler implements MiddlewareHandler
         } else {
             return null;
         }
+    }
+    
+    public void shutdown()
+    {
+        this.keep_running = false;
     }
     
     public String getHandlerName()

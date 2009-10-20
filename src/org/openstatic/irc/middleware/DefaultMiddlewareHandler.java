@@ -29,6 +29,11 @@ public class DefaultMiddlewareHandler implements MiddlewareHandler
         }
     }
     
+    public void shutdown()
+    {
+        // good for you!
+    }
+    
     public String getHandlerName()
     {
         return "org.openstatic.irc.middleware.DefaultMiddlewareHandler";

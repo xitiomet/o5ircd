@@ -21,7 +21,7 @@ public class WebAdminGatewayConnection extends Thread implements GatewayConnecti
         this.ircServer = ircServer;
         this.ircUser = new IrcUser(this.ircServer);
         this.ircUser.initGatewayConnection(this);
-        this.ircServer.logln(this.connection.getClientHostname(), "*** Initialized new WebAdminGateway Connection");
+        this.ircServer.log(this.connection.getClientHostname(), 1, "*** Initialized new WebAdminGateway Connection");
     }
     
     public void run()

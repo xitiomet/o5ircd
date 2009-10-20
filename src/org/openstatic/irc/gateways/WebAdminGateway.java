@@ -26,7 +26,7 @@ public class WebAdminGateway extends Thread implements Gateway
         {
             this.keep_running = true;
             this.start();
-            this.ircServer.logln("PORT: " + String.valueOf(this.port), "WebAdmin Gateway Startup!");
+            this.ircServer.log("PORT: " + String.valueOf(this.port), 1, "WebAdmin Gateway Startup!");
             return true;
         } else {
             return false;
@@ -47,7 +47,10 @@ public class WebAdminGateway extends Thread implements Gateway
     {
         httpServer = new PlaceboHttpServer(this.port);
         httpServer.setDebugStream(this.ircServer.getDebugStream());
-        httpServer.setDebug(this.ircServer.isDebug());
+        if (this.ircServer.getDebug() >= 2)
+        {
+            httpServer.setDebug(true);
+        }
         httpServer.start();
         while(this.keep_running)
         {
@@ -58,7 +61,7 @@ public class WebAdminGateway extends Thread implements Gateway
                 wagc.start();
             } catch (Exception x) {}
         }
-        ircServer.logln("PORT: " + String.valueOf(this.port), "WebAdmin Gateway Shutdown");
+        ircServer.log("PORT: " + String.valueOf(this.port), 1, "WebAdmin Gateway Shutdown");
     }
     
     public String toString()

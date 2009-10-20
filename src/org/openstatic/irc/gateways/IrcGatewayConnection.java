@@ -90,7 +90,7 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
             {
                 while ((cmd_line = br.readLine()) != null)
                 {
-                    this.ircUser.getIrcServer().logln(this.clientHostname, "-> " + cmd_line);
+                    this.ircUser.getIrcServer().log(this.clientHostname, 5, "-> " + cmd_line);
                     ReceivedCommand cmd = new ReceivedCommand(cmd_line);
                     if (cmd.is("PONG"))
                     {
@@ -99,10 +99,10 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
                     this.ircUser.onGatewayCommand(cmd);
                 }
             } catch (Exception rex) {
-                this.ircUser.getIrcServer().logln("IGC_" + this.clientHostname, "Exception: " + rex.toString() + " / " + rex.getMessage());
+                this.ircUser.getIrcServer().log("IGC_" + this.clientHostname, 1, "Exception: " + rex.toString() + " / " + rex.getMessage());
             }
         } catch (Exception x) {
-            this.ircUser.getIrcServer().logln("IGC_" + this.clientHostname, "Exception: " + x.toString() + " / " + x.getMessage());
+            this.ircUser.getIrcServer().log("IGC_" + this.clientHostname, 1, "Exception: " + x.toString() + " / " + x.getMessage());
         }
         this.ircUser.disconnect();
     }
@@ -130,7 +130,7 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
         {
             this.os.write(out.getBytes());
             this.os.flush();
-            this.ircUser.getIrcServer().log(this.clientHostname, "<- " + out);
+            this.ircUser.getIrcServer().log(this.clientHostname, 5, "<- " + out);
         } catch (Exception we) {}
     }
 }

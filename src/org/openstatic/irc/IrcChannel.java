@@ -70,6 +70,14 @@ public class IrcChannel implements MiddlewareHandler
         this.member_modes = new Hashtable<IrcUser, String>();
     }
     
+    public void shutdown()
+    {
+        if (this.myHandler != null && this.myHandler != this)
+        {
+            this.myHandler.shutdown();
+        }
+    }
+    
     public String getName()
     {
         return this.channel_name;

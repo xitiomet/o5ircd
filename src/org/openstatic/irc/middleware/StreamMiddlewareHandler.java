@@ -15,12 +15,14 @@ public class StreamMiddlewareHandler implements MiddlewareHandler
     private InputStream is;
     private PrintStream os;
     private MiddlewareHandler middlewareHandler;
+    private boolean keep_running;
     
     public StreamMiddlewareHandler(InputStream is, OutputStream os)
     {
         this.is = is;
         this.os = new PrintStream(os);
         this.middlewareHandler = null;
+        this.keep_running = true;
         
         final BufferedReader br = new BufferedReader(new InputStreamReader(this.is));
         Thread t = new Thread()
@@ -30,7 +32,7 @@ public class StreamMiddlewareHandler implements MiddlewareHandler
                 try
                 {
                     String cmd_line;
-                    while ((cmd_line = br.readLine()) != null)
+                    while ((cmd_line = br.readLine()) != null && StreamMiddlewareHandler.this.keep_running)
                     {
                         ReceivedCommand rc = new ReceivedCommand(cmd_line);
                         if (rc.getSource() != null && StreamMiddlewareHandler.this.middlewareHandler != null)
@@ -63,6 +65,11 @@ public class StreamMiddlewareHandler implements MiddlewareHandler
         } else {
             return null;
         }
+    }
+    
+    public void shutdown()
+    {
+        this.keep_running = false;
     }
     
     public String getHandlerName()

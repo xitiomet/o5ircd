@@ -15,4 +15,5 @@ public interface MiddlewareHandler
     public String getHandlerDetails();
     public String getHandlerDescription();
     public IrcUser findMember(String value);
+    public void shutdown();
 }

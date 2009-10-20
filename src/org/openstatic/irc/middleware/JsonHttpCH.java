@@ -19,9 +19,11 @@ public class JsonHttpCH implements MiddlewareHandler
     private int polling_time;
     private int polling_cycle;
     private MiddlewareHandler middlewareHandler;
-
+    private boolean keep_running;
+    
     public JsonHttpCH(Properties setup)
     {
+        this.keep_running = true;
         try
         {
             this.url = new URL(setup.getProperty("url"));
@@ -35,7 +37,7 @@ public class JsonHttpCH implements MiddlewareHandler
             {
                 public void run()
                 {
-                    while (true)
+                    while (JsonHttpCH.this.keep_running)
                     {
                         if (JsonHttpCH.this.polling_time >= JsonHttpCH.this.polling_cycle && JsonHttpCH.this.middlewareHandler != null)
                         {
@@ -54,6 +56,11 @@ public class JsonHttpCH implements MiddlewareHandler
         }
     }
 
+    public void shutdown()
+    {
+        this.keep_running = false;
+    }
+    
     public void poll()
     {
         try

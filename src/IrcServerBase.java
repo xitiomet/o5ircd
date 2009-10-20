@@ -116,7 +116,7 @@ public class IrcServerBase
                 
                 if (arg.equals("--debug"))
                 {
-                    irc.setDebug(true);
+                    irc.setDebug(Integer.valueOf(arg_p1).intValue());
                 }
                 
                 if (arg.equals("--irc-port") && arg_p1 != null)

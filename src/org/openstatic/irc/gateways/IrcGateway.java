@@ -26,7 +26,7 @@ public class IrcGateway extends Thread implements Gateway
         {
             this.keep_running = true;
             this.start();
-            this.ircServer.logln("PORT: " + String.valueOf(this.port), "Irc Gateway Startup!");
+            this.ircServer.log("PORT: " + String.valueOf(this.port), 1, "Irc Gateway Startup!");
             return true;
         } else {
             return false;
@@ -61,6 +61,6 @@ public class IrcGateway extends Thread implements Gateway
                 ircServer.addUser(ircUser);
             } catch (Exception x) {}
         }
-        ircServer.logln("PORT: " + String.valueOf(this.port), "Irc Gateway Shutdown");
+        ircServer.log("PORT: " + String.valueOf(this.port), 1, "Irc Gateway Shutdown");
     }
 }
