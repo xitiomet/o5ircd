@@ -99,8 +99,10 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
                     this.ircUser.onGatewayCommand(cmd);
                 }
             } catch (Exception rex) {
+                this.ircUser.getIrcServer().logln("IGC_" + this.clientHostname, "Exception: " + rex.toString() + " / " + rex.getMessage());
             }
         } catch (Exception x) {
+            this.ircUser.getIrcServer().logln("IGC_" + this.clientHostname, "Exception: " + x.toString() + " / " + x.getMessage());
         }
         this.ircUser.disconnect();
     }

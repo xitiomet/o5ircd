@@ -76,13 +76,16 @@ build/org/openstatic/irc/middleware/StreamMiddlewareHandler.class: src/org/opens
 build/org/openstatic/irc/middleware/TwitterMiddlewareHandler.class: src/org/openstatic/irc/middleware/TwitterMiddlewareHandler.java
 	$(JC) $(JC_FLAGS) --classpath=$(CLASS_PATH) -C $<
 
+build/org/openstatic/irc/middleware/StreamingJsonMiddlewareHandler.class: src/org/openstatic/irc/middleware/StreamingJsonMiddlewareHandler.java
+	$(JC) $(JC_FLAGS) --classpath=$(CLASS_PATH) -C $<
+
 build/org/openstatic/irc/middleware/JsonHttpCH.class: src/org/openstatic/irc/middleware/JsonHttpCH.java
 	$(JC) $(JC_FLAGS) --classpath=$(CLASS_PATH) -C $<
 
 # Main Builds
 # -------------------------------------------------------------------------------
 
-ircd.jar: build/org/openstatic/irc/IrcServer.class build/org/openstatic/irc/ReceivedCommand.class build/org/openstatic/irc/IrcUser.class build/org/openstatic/irc/IrcChannel.class build/org/openstatic/irc/MiddlewareHandler.class build/org/openstatic/irc/PreparedCommand.class build/org/openstatic/irc/middleware/DefaultMiddlewareHandler.class build/org/openstatic/irc/middleware/StreamMiddlewareHandler.class build/org/openstatic/irc/middleware/JsonHttpCH.class build/org/openstatic/irc/GatewayConnection.class build/org/openstatic/irc/Gateway.class build/org/openstatic/irc/gateways/IrcGatewayConnection.class build/org/openstatic/irc/gateways/IrcGateway.class build/org/openstatic/irc/gateways/WebAdminGatewayConnection.class build/org/openstatic/irc/gateways/WebAdminGateway.class build/org/openstatic/irc/middleware/TwitterMiddlewareHandler.class build/org/openstatic/Base64Coder.class
+ircd.jar: build/org/openstatic/irc/IrcServer.class build/org/openstatic/irc/ReceivedCommand.class build/org/openstatic/irc/IrcUser.class build/org/openstatic/irc/IrcChannel.class build/org/openstatic/irc/MiddlewareHandler.class build/org/openstatic/irc/PreparedCommand.class build/org/openstatic/irc/middleware/DefaultMiddlewareHandler.class build/org/openstatic/irc/middleware/StreamMiddlewareHandler.class build/org/openstatic/irc/middleware/JsonHttpCH.class build/org/openstatic/irc/GatewayConnection.class build/org/openstatic/irc/Gateway.class build/org/openstatic/irc/gateways/IrcGatewayConnection.class build/org/openstatic/irc/gateways/IrcGateway.class build/org/openstatic/irc/gateways/WebAdminGatewayConnection.class build/org/openstatic/irc/gateways/WebAdminGateway.class build/org/openstatic/irc/middleware/TwitterMiddlewareHandler.class build/org/openstatic/irc/middleware/StreamingJsonMiddlewareHandler.class build/org/openstatic/Base64Coder.class
 	$(JAR) -cvf $@ -C build org
 
 clean:

@@ -8,6 +8,7 @@ jvm-build
 ircd
 ircd.jar
 .DS_Store
+nohup.out
 
 syntax: regexp
 (.*/)?\#[^/]*\#$

@@ -28,9 +28,7 @@ public class IrcChannel implements MiddlewareHandler
                 Class<?> c = Class.forName(setup.getProperty("middleware"));
                 Constructor<?> cons = c.getDeclaredConstructor(Properties.class);
                 this.myHandler = (MiddlewareHandler) cons.newInstance(setup);
-            } catch (Exception e) {
-                System.err.println(e.getMessage());
-            }
+            } catch (Exception e) {}
         }
         this.members = new Vector<IrcUser>();
         this.pending_joins = new Vector<IrcUser>();
