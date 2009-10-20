@@ -12,11 +12,13 @@ public class IrcGateway extends Thread implements Gateway
     private int port;
     private boolean keep_running;
     private IrcServer ircServer;
+    private ServerSocket ss;
     
     public IrcGateway(int port)
     {
         this.port = port;
         this.ircServer = null;
+        this.ss = null;
     }
     
     public boolean initGateway(IrcServer ircServer)
@@ -36,6 +38,11 @@ public class IrcGateway extends Thread implements Gateway
     public void shutdownGateway()
     {
         this.keep_running = false;
+        try
+        {
+            this.ss.close();
+            join();
+        } catch (Exception ss_close) {}
     }
     
     public IrcServer getIrcServer()
@@ -45,7 +52,7 @@ public class IrcGateway extends Thread implements Gateway
     
     public void run()
     {
-        ServerSocket ss = null;
+        
         try
         {
             ss = new ServerSocket(this.port);

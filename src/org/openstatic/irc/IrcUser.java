@@ -51,8 +51,8 @@ public class IrcUser extends Thread
     public void disconnect()
     {
         this.server.log(this.username, 1, "IrcUser Class " + this.nickname + " disconnect()");
-        this.stay_connected = false;
         this.connection.close();
+        this.stay_connected = false;
         this.server.removeUser(this);
     }
     

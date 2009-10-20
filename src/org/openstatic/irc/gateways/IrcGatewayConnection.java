@@ -20,6 +20,7 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
     private int ping_countdown;
     private boolean stay_connected;
     private IrcUser ircUser;
+    private BufferedReader br;
     
     public IrcGatewayConnection(Socket connection, IrcUser ircUser)
     {
@@ -50,6 +51,16 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
     public void close()
     {
         this.stay_connected = false;
+        if (this.isAlive())
+        {
+            try
+            {
+                this.is.close();
+                this.os.close();
+                this.br.close();
+                this.connection.close();
+            } catch (Exception close_exception) {}
+        }
     }
     
     public void run()
@@ -74,21 +85,31 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
                             IrcGatewayConnection.this.stay_connected = false;
                         try
                         {
-                            if (!IrcGatewayConnection.this.stay_connected)
-                                IrcGatewayConnection.this.connection.close();
                             Thread.sleep(1000);
                         } catch (Exception ne) {}
                     }
                 }
             };
             pingPong.start();
-            
+        } catch (Exception x) {
+            this.ircUser.getIrcServer().log(this.clientHostname, 1, "IrcGatewayConnection PingPongThread Exception: " + x.toString() + " / " + x.getMessage());
+            this.ircUser.disconnect();
+        }
+        try
+        {
             // here we process input from the user
-            BufferedReader br = new BufferedReader(new InputStreamReader(this.is));
+            br = new BufferedReader(new InputStreamReader(this.is));
             String cmd_line;
-            try
+            do
             {
-                while ((cmd_line = br.readLine()) != null)
+                try
+                {
+                    cmd_line = br.readLine();
+                } catch (Exception n) {
+                    cmd_line = null;
+                }
+                
+                if (cmd_line != null)
                 {
                     this.ircUser.getIrcServer().log(this.clientHostname, 5, "-> " + cmd_line);
                     ReceivedCommand cmd = new ReceivedCommand(cmd_line);
@@ -98,13 +119,14 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
                     }
                     this.ircUser.onGatewayCommand(cmd);
                 }
-            } catch (Exception rex) {
-                this.ircUser.getIrcServer().log("IGC_" + this.clientHostname, 1, "Exception: " + rex.toString() + " / " + rex.getMessage());
-            }
-        } catch (Exception x) {
-            this.ircUser.getIrcServer().log("IGC_" + this.clientHostname, 1, "Exception: " + x.toString() + " / " + x.getMessage());
+            } while (cmd_line != null && this.stay_connected);
+            this.connection.close();
+        } catch (Exception rex) {
+            this.ircUser.getIrcServer().log(this.clientHostname, 1, "IrcGatewayConnection Exception: " + rex.toString() + " / " + rex.getMessage());
+            this.ircUser.disconnect();
         }
-        this.ircUser.disconnect();
+
+        this.ircUser.getIrcServer().log(this.clientHostname, 1, "IrcGatewayConnection Thread Exiting!");
     }
     
     public void sendResponse(String response, String params)

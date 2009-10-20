@@ -19,12 +19,14 @@ public class StreamingJsonMiddlewareHandler implements MiddlewareHandler
     private Properties setup;
     private Thread read_json;
     private boolean keep_running;
+    private BufferedReader bread;
     
     public StreamingJsonMiddlewareHandler(Properties setup)
     {
         this.keep_running = true;
         this.setup = setup;
         this.middlewareHandler = null;
+        this.bread = null;
         
         read_json = new Thread()
         {
@@ -44,13 +46,13 @@ public class StreamingJsonMiddlewareHandler implements MiddlewareHandler
                     } else {
                         connection = (HttpURLConnection) (new URL(url)).openConnection();
                     }
-                    BufferedReader bread = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    bread = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                     String newLine = null;
                     do
                     {
-                        newLine = bread.readLine();
                         try
                         {
+                            newLine = bread.readLine();
                             JSONObject json_object = new JSONObject(newLine);
                             
                             String stream_nickname = StreamingJsonMiddlewareHandler.this.resolveField(json_object, "stream_data_nickname");
@@ -132,6 +134,12 @@ public class StreamingJsonMiddlewareHandler implements MiddlewareHandler
     public void shutdown()
     {
         this.keep_running = false;
+        try
+        {
+            bread.close();
+        } catch (Exception e) {
+            //couldnt close buffered reader
+        }
     }
     
     public String getHandlerName()
