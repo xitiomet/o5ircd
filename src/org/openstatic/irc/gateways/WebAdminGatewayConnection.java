@@ -5,9 +5,8 @@ import org.openstatic.irc.PreparedCommand;
 import org.openstatic.irc.IrcServer;
 import org.openstatic.irc.IrcUser;
 import org.openstatic.http.HttpRequest;
+import org.openstatic.http.HttpResponse;
 import org.openstatic.http.PlaceboSession;
-import java.io.PrintStream;
-
 
 public class WebAdminGatewayConnection extends Thread implements GatewayConnection
 {
@@ -45,27 +44,29 @@ public class WebAdminGatewayConnection extends Thread implements GatewayConnecti
             {
                 this.ircUser.loginUser(username, password);
             } else {
-                PrintStream out = new PrintStream(nr.getOutputStream());
-                out.println("<html>");
-                out.println("<body><h1>Openstatic.org Irc Server</h1>");
-                out.println("<form method=\"post\"><table>");
-                out.println("<tr><td>Username:</td><td><input type=\"text\" name=\"username\"></td></tr>");
-                out.println("<tr><td>Password:</td><td><input type=\"password\" name=\"password\"></td></tr>");
-                out.println("<tr><td></td><td align=\"right\"><input type=\"submit\" value=\"login\"></td></tr>");
-                out.println("</table></form>");
-                out.println("</body>");
-                out.println("</html>");
-                nr.sendResponse("text/html");
+                HttpResponse response = new HttpResponse();
+                response.setContentType("text/html");
+                response.setData("<html>" +
+                                 "<body><h1>Openstatic.org Irc Server</h1>" +
+                                 "<form method=\"post\"><table>" +
+                                 "<tr><td>Username:</td><td><input type=\"text\" name=\"username\"></td></tr>" +
+                                 "<tr><td>Password:</td><td><input type=\"password\" name=\"password\"></td></tr>" +
+                                 "<tr><td></td><td align=\"right\"><input type=\"submit\" value=\"login\"></td></tr>" +
+                                 "</table></form>" +
+                                 "</body>" +
+                                 "</html>");
+                nr.sendResponse(response);
             }
         }
         if (nr.getPath().equals("/") && this.ircUser.isReady())
         {
-                PrintStream out = new PrintStream(nr.getOutputStream());
-                out.println("<html>");
-                out.println("<body><h1>Openstatic.org Irc Server</h1>");
-                out.println("</body>");
-                out.println("</html>");
-                nr.sendResponse("text/html");
+                HttpResponse response = new HttpResponse();
+                response.setContentType("text/html");
+                response.setData("<html>" +
+                                 "<body><h1>Openstatic.org Irc Server</h1>" +
+                                 "</body>" +
+                                 "</html>");
+                nr.sendResponse(response);
         }
     }
     
