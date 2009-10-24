@@ -7,8 +7,8 @@ import org.openstatic.irc.gateways.IrcGateway;
 import org.openstatic.irc.gateways.WebAdminGateway;
 import java.io.File;
 import java.io.InputStreamReader;
-import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.Properties;
 
 //import org.openstatic.irc.middleware.DefaultMiddlewareHandler;
@@ -94,6 +94,7 @@ public class IrcServerBase
     public static void main(String[] args) throws Exception
     {
         IrcServer irc = new IrcServer();
+        ByteArrayOutputStream debug_target = new ByteArrayOutputStream();
         
         if (args.length == 0)
         {
@@ -164,6 +165,7 @@ public class IrcServerBase
                 {
                     run_cli = true;
                     join_thread = false;
+                    irc.setDebugStream(debug_target);
                 }
                 
             }
@@ -172,12 +174,39 @@ public class IrcServerBase
             if (run_cli)
             {
                 boolean do_input = true;
-                BufferedReader std_in = new BufferedReader(new InputStreamReader(System.in));
+                InputStreamReader std_in = new InputStreamReader(System.in);
                 String cl_mode = "@CLI";
                 while (do_input)
                 {
-                    System.out.print("[" + cl_mode + "] >");
-                    String cmd_line = std_in.readLine();
+                    boolean still_reading = true;
+                    StringBuffer cmd_line_buffer = new StringBuffer();
+                    System.out.print("[" + cl_mode + "] >" + cmd_line_buffer.toString());
+                    
+                    // block for reading input and maintaining prompt
+                    while (still_reading)
+                    {
+                        String debug_line = debug_target.toString("UTF-8");
+                        if (debug_target.size() > 0 && debug_line.indexOf("\n") != -1)
+                        {
+                            int prompt_size = cl_mode.length() + 4 + cmd_line_buffer.length();
+                            System.out.print("\033[2K\033[" + String.valueOf(prompt_size) + "D");
+                            debug_target.writeTo(System.out);
+                            debug_target.reset();
+                            System.out.print("[" + cl_mode + "] >" + cmd_line_buffer.toString());
+                        }
+                        if (std_in.ready())
+                        {
+                            char read_char = (char) std_in.read();
+                            if (read_char == '\n' || read_char == '\r')
+                            {
+                                still_reading = false;
+                            } else {
+                                cmd_line_buffer.append(read_char);
+                            }
+                        }
+                    }
+                    
+                    String cmd_line = cmd_line_buffer.toString();
                     String[] cmd_ary = cmd_line.split(" ");
                     
                     if (cmd_ary[0].equals("quit"))
