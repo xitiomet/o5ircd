@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -113,7 +114,38 @@ public class StreamingJsonMiddlewareHandler implements MiddlewareHandler
     
     public void onCommand(ReceivedCommand command, MiddlewareHandler middlewareHandler)
     {
-        middlewareHandler.onCommand(command, this);
+        if (command.is("PRIVMSG"))
+        {
+            String privmsg_to = this.setup.getProperty("channel_name");
+            if (privmsg_to.equals(command.getArg(0)))
+            {
+                String username = this.setup.getProperty("username");
+                String password = this.setup.getProperty("password");
+                String reply_url = this.setup.getProperty("reply_url");
+                String reply_message_field = this.setup.getProperty("reply_message_field");
+
+                try
+                {
+                    HttpURLConnection connection = null;
+                    if (username != null && password != null)
+                    {
+                        connection = authenticate(reply_url, username, password);
+                    } else {
+                        connection = (HttpURLConnection) (new URL(reply_url)).openConnection();
+                    }
+                    String data = URLEncoder.encode(reply_message_field, "UTF-8") + "=" + URLEncoder.encode(command.getArg(1), "UTF-8");
+                    connection.setDoOutput(true);
+                    OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
+                    wr.write(data);
+                    wr.flush();
+                    wr.close();
+                    int resp = connection.getResponseCode();
+                } catch (Exception n) {}
+            }
+        } else {
+            middlewareHandler.onCommand(command, this);
+        }
+        
         if (this.middlewareHandler == null || read_json.isAlive() == false)
         {
             this.middlewareHandler = middlewareHandler;
