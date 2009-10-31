@@ -6,10 +6,22 @@ One of the strengths of this server is its middleware functionality for chatroom
 Each chatroom is treated like an object and can route its traffic through any number
 of middleware classes. This allows each chatroom to act like its own mini-server.
 
-In order to compile the server you will need to do the following on debian based systems
+
+1. Setup
+
+In order to compile this software using gcj you will need to fist install the gcj packages
+for debian based systems with apt you can do the following...
 
 $ sudo apt-get install gcj java-gcj-compat make
 
-then to compile just run make!
+If you would like to build using javac run the following
 
-This readme is a work in progress. More to come.
+$ make jvm
+
+This will create a version using the java vm instead of gcj
+
+2. Issues
+
+Depending on your version of gcj and your environment setup you may have some trouble compiling
+please be sure that gcj, javac and jar are in you executable path. Also this program was developed
+using gcj 4.3, please be sure that you are using an up to date version of gcj.

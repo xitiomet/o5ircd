@@ -13,13 +13,13 @@ all: ircd
 jvm:
 	mkdir jvm-build
 	javac -cp lib/json-gcj.jar:lib/placebohttp.jar -d jvm-build src/IrcServerBase.java src/org/openstatic/*.java src/org/openstatic/irc/*.java src/org/openstatic/irc/gateways/*.java src/org/openstatic/irc/middleware/*.java
-	jar -cvf jvm-osircd.jar -C jvm-build org
+	jar -cvmf manifest.mf jvm-osircd.jar -C jvm-build org -C jvm-build IrcServerBase.class
 
 # Executable Rule for GCJ
 # -------------------------------------------------------------------------------
 # check it, the ordering of the jar files in gcj is important. Each dependency should be included before any lib that requires it
 # example: ircd.jar dependes on json-gcj.jar and placebohttp.jar, therefore they must go first!!!
-ircd: lib/json-gcj.jar lib/placebohttp.jar ircd.jar build/IrcServerBase.class
+ircd: lib/json-gcj.jar lib/placebohttp.jar osircd.jar
 	$(JC) $^ -O2 -findirect-dispatch -fuse-boehm-gc --main=IrcServerBase -o $@
 
 # Here are all the classes for the project
@@ -85,8 +85,8 @@ build/org/openstatic/irc/middleware/JsonHttpCH.class: src/org/openstatic/irc/mid
 # Main Builds
 # -------------------------------------------------------------------------------
 
-ircd.jar: build/org/openstatic/irc/IrcServer.class build/org/openstatic/irc/ReceivedCommand.class build/org/openstatic/irc/IrcUser.class build/org/openstatic/irc/IrcChannel.class build/org/openstatic/irc/MiddlewareHandler.class build/org/openstatic/irc/PreparedCommand.class build/org/openstatic/irc/middleware/DefaultMiddlewareHandler.class build/org/openstatic/irc/middleware/StreamMiddlewareHandler.class build/org/openstatic/irc/middleware/JsonHttpCH.class build/org/openstatic/irc/GatewayConnection.class build/org/openstatic/irc/Gateway.class build/org/openstatic/irc/gateways/IrcGatewayConnection.class build/org/openstatic/irc/gateways/IrcGateway.class build/org/openstatic/irc/gateways/WebAdminGatewayConnection.class build/org/openstatic/irc/gateways/WebAdminGateway.class build/org/openstatic/irc/middleware/TwitterMiddlewareHandler.class build/org/openstatic/irc/middleware/StreamingJsonMiddlewareHandler.class build/org/openstatic/Base64Coder.class
-	$(JAR) -cvf $@ -C build org
+osircd.jar: build/org/openstatic/irc/IrcServer.class build/org/openstatic/irc/ReceivedCommand.class build/org/openstatic/irc/IrcUser.class build/org/openstatic/irc/IrcChannel.class build/org/openstatic/irc/MiddlewareHandler.class build/org/openstatic/irc/PreparedCommand.class build/org/openstatic/irc/middleware/DefaultMiddlewareHandler.class build/org/openstatic/irc/middleware/StreamMiddlewareHandler.class build/org/openstatic/irc/middleware/JsonHttpCH.class build/org/openstatic/irc/GatewayConnection.class build/org/openstatic/irc/Gateway.class build/org/openstatic/irc/gateways/IrcGatewayConnection.class build/org/openstatic/irc/gateways/IrcGateway.class build/org/openstatic/irc/gateways/WebAdminGatewayConnection.class build/org/openstatic/irc/gateways/WebAdminGateway.class build/org/openstatic/irc/middleware/TwitterMiddlewareHandler.class build/org/openstatic/irc/middleware/StreamingJsonMiddlewareHandler.class build/org/openstatic/Base64Coder.class build/IrcServerBase.class
+	$(JAR) -cvmf manifest.mf $@ -C build org -C build IrcServerBase.class
 
 clean:
 	rm -fR build
