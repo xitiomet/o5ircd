@@ -13,7 +13,7 @@ all: ircd
 jvm:
 	mkdir jvm-build
 	javac -cp lib/json-gcj.jar:lib/placebohttp.jar -d jvm-build src/IrcServerBase.java src/org/openstatic/*.java src/org/openstatic/irc/*.java src/org/openstatic/irc/gateways/*.java src/org/openstatic/irc/middleware/*.java
-	jar -cvmf manifest.mf jvm-osircd.jar -C jvm-build org -C jvm-build IrcServerBase.class
+	jar -cvmf res/manifest.mf osircd.jar -C jvm-build org -C jvm-build IrcServerBase.class
 
 # Executable Rule for GCJ
 # -------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ ircd: lib/json-gcj.jar lib/placebohttp.jar osircd.jar
 # Here are all the classes for the project
 # -------------------------------------------------------------------------------
 
-build/IrcServerBase.class: src/IrcServerBase.java ircd.jar
+build/IrcServerBase.class: src/IrcServerBase.java
 	$(JC) $(JC_FLAGS) --classpath=$(CLASS_PATH) -C $<
 
 build/org/openstatic/irc/IrcServer.class: src/org/openstatic/irc/IrcServer.java
@@ -86,11 +86,10 @@ build/org/openstatic/irc/middleware/JsonHttpCH.class: src/org/openstatic/irc/mid
 # -------------------------------------------------------------------------------
 
 osircd.jar: build/org/openstatic/irc/IrcServer.class build/org/openstatic/irc/ReceivedCommand.class build/org/openstatic/irc/IrcUser.class build/org/openstatic/irc/IrcChannel.class build/org/openstatic/irc/MiddlewareHandler.class build/org/openstatic/irc/PreparedCommand.class build/org/openstatic/irc/middleware/DefaultMiddlewareHandler.class build/org/openstatic/irc/middleware/StreamMiddlewareHandler.class build/org/openstatic/irc/middleware/JsonHttpCH.class build/org/openstatic/irc/GatewayConnection.class build/org/openstatic/irc/Gateway.class build/org/openstatic/irc/gateways/IrcGatewayConnection.class build/org/openstatic/irc/gateways/IrcGateway.class build/org/openstatic/irc/gateways/WebAdminGatewayConnection.class build/org/openstatic/irc/gateways/WebAdminGateway.class build/org/openstatic/irc/middleware/TwitterMiddlewareHandler.class build/org/openstatic/irc/middleware/StreamingJsonMiddlewareHandler.class build/org/openstatic/Base64Coder.class build/IrcServerBase.class
-	$(JAR) -cvmf manifest.mf $@ -C build org -C build IrcServerBase.class
+	$(JAR) -cvmf res/manifest.mf $@ -C build org -C build IrcServerBase.class
 
 clean:
 	rm -fR build
 	rm -f ircd
-	rm -f ircd.jar
-	rm -f jvm-osircd.jar
+	rm -f osircd.jar
 	rm -fR jvm-build

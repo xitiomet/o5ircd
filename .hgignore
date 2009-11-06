@@ -6,7 +6,7 @@ syntax: glob
 build
 jvm-build
 ircd
-ircd.jar
+osircd.jar
 .DS_Store
 nohup.out
 
