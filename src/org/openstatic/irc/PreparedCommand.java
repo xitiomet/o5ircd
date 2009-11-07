@@ -28,7 +28,7 @@ public class PreparedCommand
         this.destination = null;
     }
     
-    public PreparedCommand(ReceivedCommand rc, String source)
+    public PreparedCommand(IRCMessage rc, String source)
     {
         this.cmd = rc.cmd;
         this.args = rc.args;
@@ -37,7 +37,7 @@ public class PreparedCommand
         this.destination = rc.destination;
     }
 
-    public PreparedCommand(ReceivedCommand rc, IrcUser u)
+    public PreparedCommand(IRCMessage rc, IrcUser u)
     {
         this.cmd = rc.cmd;
         this.args = rc.args;
@@ -46,7 +46,7 @@ public class PreparedCommand
         this.destination = rc.destination;
     }
     
-    public PreparedCommand(ReceivedCommand rc)
+    public PreparedCommand(IRCMessage rc)
     {
         this.cmd = rc.cmd;
         this.args = rc.args;

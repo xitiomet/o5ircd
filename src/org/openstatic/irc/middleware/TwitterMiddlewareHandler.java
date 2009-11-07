@@ -1,7 +1,7 @@
 package org.openstatic.irc.middleware;
 
 import org.openstatic.irc.MiddlewareHandler;
-import org.openstatic.irc.ReceivedCommand;
+import org.openstatic.irc.IRCMessage;
 import org.openstatic.irc.IrcUser;
 import org.openstatic.Base64Coder;
 import org.json.*;
@@ -51,7 +51,7 @@ public class TwitterMiddlewareHandler implements MiddlewareHandler
                             JSONObject user = tweet.getJSONObject("user");
                             String username = user.getString("screen_name");
                             String raw_irc = ":" + username + "!" + username + "@twitter.com PRIVMSG " + TwitterMiddlewareHandler.this.privmsg_to + " :" + message;
-                            ReceivedCommand rc = new ReceivedCommand(raw_irc);
+                            IRCMessage rc = new IRCMessage(raw_irc);
                             TwitterMiddlewareHandler.this.middlewareHandler.onCommand(rc, TwitterMiddlewareHandler.this);
                         } catch (Exception ve) {}
                     } while (newLine != null && TwitterMiddlewareHandler.this.keep_running);
@@ -74,7 +74,7 @@ public class TwitterMiddlewareHandler implements MiddlewareHandler
         return c;
     }
     
-    public void onCommand(ReceivedCommand command, MiddlewareHandler middlewareHandler)
+    public void onCommand(IRCMessage command, MiddlewareHandler middlewareHandler)
     {
         middlewareHandler.onCommand(command, this);
         if (this.middlewareHandler == null || read_twitter.isAlive() == false)

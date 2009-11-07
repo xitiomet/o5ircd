@@ -100,12 +100,12 @@ public class IrcChannel implements MiddlewareHandler
     
     public boolean removeMember(IrcUser u)
     {
-        ReceivedCommand rc = new ReceivedCommand("PART", u);
+        IRCMessage rc = new IRCMessage("PART", u);
         rc.addArg(this.channel_name);
         return removeMember(rc);
     }
     
-    public boolean removeMember(ReceivedCommand receivedCommand)
+    public boolean removeMember(IRCMessage receivedCommand)
     {
         IrcUser u = findMember(receivedCommand.getSource());
         int idx = members.indexOf(u);
@@ -197,7 +197,7 @@ public class IrcChannel implements MiddlewareHandler
         return null;        
     }
     
-    public boolean addMember(IrcUser u, ReceivedCommand receivedCommand)
+    public boolean addMember(IrcUser u, IRCMessage receivedCommand)
     {
         int idx = members.indexOf(u);
         if (idx == -1)
@@ -263,7 +263,7 @@ public class IrcChannel implements MiddlewareHandler
         return null;
     }
     
-    public void onCommand(ReceivedCommand receivedCommand, MiddlewareHandler middlewareHandler)
+    public void onCommand(IRCMessage receivedCommand, MiddlewareHandler middlewareHandler)
     {
         IrcUser u = findMember(receivedCommand.getSource());
         if (receivedCommand.is("JOIN")) {

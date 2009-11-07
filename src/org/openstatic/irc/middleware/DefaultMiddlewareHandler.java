@@ -1,7 +1,7 @@
 package org.openstatic.irc.middleware;
 
 import org.openstatic.irc.MiddlewareHandler;
-import org.openstatic.irc.ReceivedCommand;
+import org.openstatic.irc.IRCMessage;
 import org.openstatic.irc.IrcUser;
 
 public class DefaultMiddlewareHandler implements MiddlewareHandler
@@ -13,7 +13,7 @@ public class DefaultMiddlewareHandler implements MiddlewareHandler
         this.middlewareHandler = null;
     }
     
-    public void onCommand(ReceivedCommand command, MiddlewareHandler middlewareHandler)
+    public void onCommand(IRCMessage command, MiddlewareHandler middlewareHandler)
     {
         this.middlewareHandler = middlewareHandler;
         middlewareHandler.onCommand(command, this);

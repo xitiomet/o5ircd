@@ -2,7 +2,7 @@ package org.openstatic.irc.middleware;
 
 import org.openstatic.irc.IrcUser;
 import org.openstatic.irc.MiddlewareHandler;
-import org.openstatic.irc.ReceivedCommand;
+import org.openstatic.irc.IRCMessage;
 import org.json.*;
 
 import java.io.BufferedReader;
@@ -79,7 +79,7 @@ public class JsonHttpCH implements MiddlewareHandler
         }
     }
     
-    public void onCommand(ReceivedCommand command, MiddlewareHandler middlewareHandler)
+    public void onCommand(IRCMessage command, MiddlewareHandler middlewareHandler)
     {
         this.middlewareHandler = middlewareHandler;
         try
@@ -160,7 +160,7 @@ public class JsonHttpCH implements MiddlewareHandler
                 }
                 String raw_irc = ":" + cmd.getString("source") + " " + cmd.getString("command") + s_args.toString();
                 
-                ReceivedCommand rc = new ReceivedCommand(raw_irc);
+                IRCMessage rc = new IRCMessage(raw_irc);
                 JSONArray dest = null;
                 try
                 {   

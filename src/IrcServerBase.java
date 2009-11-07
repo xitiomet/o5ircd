@@ -1,7 +1,7 @@
 import org.openstatic.irc.IrcServer;
 import org.openstatic.irc.IrcUser;
 import org.openstatic.irc.IrcChannel;
-import org.openstatic.irc.ReceivedCommand;
+import org.openstatic.irc.IRCMessage;
 import org.openstatic.irc.PreparedCommand;
 import org.openstatic.irc.gateways.IrcGateway;
 import org.openstatic.irc.gateways.WebAdminGateway;
@@ -48,7 +48,7 @@ public class IrcServerBase
     // Sloppy function for sending messages from the CLI
     public static void findAndSend(String command, IrcServer irc,  String source, String target, String message)
     {
-        ReceivedCommand cmd = new ReceivedCommand(command, source);
+        IRCMessage cmd = new IRCMessage(command, source);
         cmd.addArg(target);
         cmd.addArg(message);
         

@@ -10,7 +10,7 @@ package org.openstatic.irc;
 
 public interface MiddlewareHandler
 {
-    public void onCommand(ReceivedCommand command, MiddlewareHandler middlewareHandler);
+    public void onCommand(IRCMessage command, MiddlewareHandler middlewareHandler);
     public String getHandlerName();
     public String getHandlerDetails();
     public String getHandlerDescription();

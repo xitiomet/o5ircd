@@ -2,8 +2,9 @@ package org.openstatic.irc;
 
 import java.util.Vector;
 import java.util.Enumeration;
+import org.json.*;
 
-public class ReceivedCommand
+public class IRCMessage
 {
     protected String cmd;
     protected String source;
@@ -11,7 +12,7 @@ public class ReceivedCommand
     protected Vector<String> destination;
     
     // constructor
-    public ReceivedCommand(String line)
+    public IRCMessage(String line)
     {
         this.args = new Vector<String>();
         this.destination = null;
@@ -27,7 +28,34 @@ public class ReceivedCommand
         }
     }
     
-    public ReceivedCommand(String cmd, String source)
+    public IRCMessage(JSONObject job) throws JSONException
+    {
+        this.source = job.getString("source");
+        this.cmd = job.getString("command");
+        this.args = new Vector<String>();
+        if (job.has("args"))
+        {
+            JSONArray arguments = job.getJSONArray("args");
+            for (int a = 0; a < arguments.length(); a++)
+            {
+                String c_arg = arguments.getString(a);
+                this.args.add(c_arg);
+            }
+        }
+        this.destination = null;
+        if (job.has("destination"))
+        {
+            JSONArray dest = job.getJSONArray("destination");
+            this.destination = new Vector<String>();
+            for (int b = 0; b < dest.length(); b++)
+            {
+                this.destination.add(dest.getString(b));
+            }
+        }
+        
+    }
+    
+    public IRCMessage(String cmd, String source)
     {
         this.cmd = cmd;
         this.args = new Vector<String>();
@@ -35,11 +63,19 @@ public class ReceivedCommand
         this.destination = null;
     }
 
-    public ReceivedCommand(String cmd, IrcUser source)
+    public IRCMessage(String cmd, IrcUser source)
     {
         this.cmd = cmd;
         this.args = new Vector<String>();
         this.source = source.toString();
+        this.destination = null;
+    }
+    
+    public IRCMessage()
+    {
+        this.cmd = "";
+        this.args = new Vector<String>();
+        this.source = "";
         this.destination = null;
     }
     
@@ -167,6 +203,11 @@ public class ReceivedCommand
         return this.cmd;
     }
     
+    public void setCommand(String value)
+    {
+        this.cmd = value;
+    }
+    
     // The Echo Response is for some commands that need to be echoed back to the client
     public String getEchoResponse()
     {
@@ -178,7 +219,12 @@ public class ReceivedCommand
         StringBuffer args_string = new StringBuffer("");
         for (Enumeration<String> e = args.elements(); e.hasMoreElements(); )
         {
-            args_string.append(e.nextElement());
+            String ca = e.nextElement();
+            if (ca.contains(" "))
+            {
+                ca = ":" + ca;
+            }
+            args_string.append(ca);
             if (e.hasMoreElements())
             {
                 args_string.append(" ");
@@ -219,4 +265,26 @@ public class ReceivedCommand
         return this.args.size();
     }
     
+    public JSONObject toJSONObject()
+    {
+        JSONObject job = new JSONObject();
+        try
+        {
+            job.put("source", this.getSource());
+            if (this.destination != null)
+            {
+                job.put("destination", this.destination);
+            }
+            job.put("command", this.getCommand());
+            job.put("args", this.args);
+        } catch (Exception e) {}
+        return job;
+    }
+    
+    public static IRCMessage prepareMessage(String cmd)
+    {
+        IRCMessage newm = new IRCMessage();
+        newm.setCommand(cmd);
+        return newm;
+    }
 }

@@ -1,7 +1,7 @@
 package org.openstatic.irc.middleware;
 
 import org.openstatic.irc.MiddlewareHandler;
-import org.openstatic.irc.ReceivedCommand;
+import org.openstatic.irc.IRCMessage;
 import org.openstatic.irc.IrcUser;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,7 +34,7 @@ public class StreamMiddlewareHandler implements MiddlewareHandler
                     String cmd_line;
                     while ((cmd_line = br.readLine()) != null && StreamMiddlewareHandler.this.keep_running)
                     {
-                        ReceivedCommand rc = new ReceivedCommand(cmd_line);
+                        IRCMessage rc = new IRCMessage(cmd_line);
                         if (rc.getSource() != null && StreamMiddlewareHandler.this.middlewareHandler != null)
                         {
                             StreamMiddlewareHandler.this.middlewareHandler.onCommand(rc, StreamMiddlewareHandler.this);
@@ -48,7 +48,7 @@ public class StreamMiddlewareHandler implements MiddlewareHandler
         t.start();
     }
     
-    public void onCommand(ReceivedCommand command, MiddlewareHandler middlewareHandler)
+    public void onCommand(IRCMessage command, MiddlewareHandler middlewareHandler)
     {
         this.os.println(":" + command.getSource() + " " + command.toString());
         if (this.middlewareHandler == null)

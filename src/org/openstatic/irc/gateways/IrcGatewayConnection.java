@@ -3,7 +3,7 @@ package org.openstatic.irc.gateways;
 import org.openstatic.irc.GatewayConnection;
 import org.openstatic.irc.PreparedCommand;
 import org.openstatic.irc.IrcUser;
-import org.openstatic.irc.ReceivedCommand;
+import org.openstatic.irc.IRCMessage;
 import java.net.Socket;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -112,7 +112,7 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
                 if (cmd_line != null)
                 {
                     this.ircUser.getIrcServer().log(this.clientHostname, 5, "-> " + cmd_line);
-                    ReceivedCommand cmd = new ReceivedCommand(cmd_line);
+                    IRCMessage cmd = new IRCMessage(cmd_line);
                     if (cmd.is("PONG"))
                     {
                         this.ping_countdown = 60;

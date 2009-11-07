@@ -1,7 +1,7 @@
 package org.openstatic.irc.middleware;
 
 import org.openstatic.irc.MiddlewareHandler;
-import org.openstatic.irc.ReceivedCommand;
+import org.openstatic.irc.IRCMessage;
 import org.openstatic.irc.IrcUser;
 import org.openstatic.Base64Coder;
 import org.json.*;
@@ -61,7 +61,7 @@ public class StreamingJsonMiddlewareHandler implements MiddlewareHandler
                             String stream_username = StreamingJsonMiddlewareHandler.this.resolveField(json_object, "stream_data_username");
                             String stream_message = StreamingJsonMiddlewareHandler.this.resolveField(json_object, "stream_data_message");
                             String raw_irc = ":" + stream_nickname + "!" + stream_username + "@" + stream_hostname + " PRIVMSG " + privmsg_to + " :" + stream_message;
-                            ReceivedCommand rc = new ReceivedCommand(raw_irc);
+                            IRCMessage rc = new IRCMessage(raw_irc);
                             StreamingJsonMiddlewareHandler.this.middlewareHandler.onCommand(rc, StreamingJsonMiddlewareHandler.this);
                         } catch (Exception ve) {}
                     } while (newLine != null && StreamingJsonMiddlewareHandler.this.keep_running);
@@ -112,7 +112,7 @@ public class StreamingJsonMiddlewareHandler implements MiddlewareHandler
         return c;
     }
     
-    public void onCommand(ReceivedCommand command, MiddlewareHandler middlewareHandler)
+    public void onCommand(IRCMessage command, MiddlewareHandler middlewareHandler)
     {
         if (command.is("PRIVMSG"))
         {
