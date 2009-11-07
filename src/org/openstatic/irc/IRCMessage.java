@@ -91,7 +91,7 @@ public class IRCMessage
     {
         this.cmd = "";
         this.args = new Vector<String>();
-        this.source = "";
+        this.source = null;
         this.destination = null;
     }
     

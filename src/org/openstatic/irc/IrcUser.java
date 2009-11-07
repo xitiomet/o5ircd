@@ -114,6 +114,7 @@ public class IrcUser extends Thread
             if (cmd.argCount() >= 2)
             {
                 IrcChannel desired_channel = this.server.findChannel(cmd.getArg(1));
+                if (desired_channel != null)
                 {
                     desired_channel.getHandler().onCommand(cmd, desired_channel);
                 }
