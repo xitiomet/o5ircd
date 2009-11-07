@@ -113,13 +113,11 @@ public class IrcChannel implements MiddlewareHandler
         {
             members.remove(idx);
             
-            PreparedCommand part_message = new PreparedCommand(receivedCommand);
+            receivedCommand.clearArgs();
+            receivedCommand.addArg(this.channel_name);
             
-            part_message.clearArgs();
-            part_message.addLastArg(this.channel_name);
-            
-            u.sendCommand(part_message);
-            broadcast(part_message, false);
+            u.sendCommand(receivedCommand);
+            broadcast(receivedCommand, false);
             
             return true;
         } else {
@@ -134,7 +132,7 @@ public class IrcChannel implements MiddlewareHandler
         {
             members.remove(idx);
             
-            PreparedCommand kick_message = new PreparedCommand("KICK");
+            IRCMessage kick_message = IRCMessage.prepare("KICK");
             kick_message.addArg(this.channel_name);
             kick_message.addArg(u.getNick());
             kick_message.setSource(src);
@@ -164,8 +162,8 @@ public class IrcChannel implements MiddlewareHandler
         int idx = members.indexOf(u);
         if (idx != -1)
         {
-            PreparedCommand new_nick = new PreparedCommand("NICK");
-            new_nick.addLastArg(newNickname);
+            IRCMessage new_nick = IRCMessage.prepare("NICK");
+            new_nick.addArg(newNickname);
             new_nick.setSource(u);
             broadcast(new_nick, false);
             return true;
@@ -203,10 +201,10 @@ public class IrcChannel implements MiddlewareHandler
         if (idx == -1)
         {
             members.add(u);
-            PreparedCommand join_message = new PreparedCommand(receivedCommand);;           
+            IRCMessage join_message = receivedCommand;           
             
             join_message.clearArgs();
-            join_message.addLastArg(this.channel_name);
+            join_message.addArg(this.channel_name);
             
             u.sendCommand(join_message);
             broadcast(join_message, false);
@@ -225,7 +223,7 @@ public class IrcChannel implements MiddlewareHandler
         }
     }
         
-    private void broadcast(PreparedCommand message, boolean withEcho)
+    private void broadcast(IRCMessage message, boolean withEcho)
     {
         for (Enumeration<IrcUser> e = this.members.elements(); e.hasMoreElements(); )
         {
@@ -325,13 +323,13 @@ public class IrcChannel implements MiddlewareHandler
                     
                 }
                 member_modes.put(mt, current_mode.toString());
-                broadcast(new PreparedCommand(receivedCommand), true);
+                broadcast(receivedCommand, true);
             }
         } else if (receivedCommand.is("INVITE") && u != null) {
             IrcUser usr = u.getIrcServer().findUser(receivedCommand.getArg(0));
             if (usr != null && receivedCommand.argCount() == 2)
             {
-                PreparedCommand pc = new PreparedCommand("INVITE");
+                IRCMessage pc = IRCMessage.prepare("INVITE");
                 pc.addArg(receivedCommand.getArg(0));
                 pc.addArg(receivedCommand.getArg(1));
                 usr.sendCommand(pc);
@@ -342,7 +340,7 @@ public class IrcChannel implements MiddlewareHandler
         } else if (receivedCommand.is("WHO")) {
             if (u != null) whoResponse(u);
         } else if (receivedCommand.is("PRIVMSG") || receivedCommand.is("NOTICE")) {
-            PreparedCommand outbound_message = new PreparedCommand(receivedCommand);
+            IRCMessage outbound_message = receivedCommand;
             if (receivedCommand.getArg(0).equals(this.channel_name))
             {
                 broadcast(outbound_message, false);
@@ -354,17 +352,17 @@ public class IrcChannel implements MiddlewareHandler
                 }
             }
         } else if (receivedCommand.is("TOPIC")) {
-            broadcast(new PreparedCommand(receivedCommand), true);
+            broadcast(receivedCommand, true);
             this.topic = receivedCommand.getArg(1);
         } else {
             if (u != null)
             {
-                u.sendCommand(new PreparedCommand(receivedCommand));
+                u.sendCommand(receivedCommand);
             } else {
                 IrcUser pj = getPendingJoin(receivedCommand.getSource());
                 if (pj != null)
                 {
-                    pj.sendCommand(new PreparedCommand(receivedCommand));
+                    pj.sendCommand(receivedCommand);
                 }
             }
         }

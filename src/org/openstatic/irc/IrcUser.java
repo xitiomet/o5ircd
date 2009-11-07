@@ -91,7 +91,7 @@ public class IrcUser extends Thread
             {
                 if (this.isWelcomed())
                 {
-                    sendCommand(new PreparedCommand(cmd, this));
+                    sendCommand(new IRCMessage(cmd, this));
                     for(Enumeration<IrcChannel> e = this.server.getChannels().elements(); e.hasMoreElements(); )
                     {
                         IrcChannel chan = e.nextElement();
@@ -166,7 +166,7 @@ public class IrcUser extends Thread
                 sendResponse("305", ":You are no longer marked as away");
             }
         } else if (cmd.is("PING")) {
-            PreparedCommand pong = new PreparedCommand("PONG");
+            IRCMessage pong = IRCMessage.prepare("PONG");
             pong.addArg(cmd.getArg(0));
             sendCommand(pong);
         } else if (cmd.is("ISON")) {
@@ -221,7 +221,7 @@ public class IrcUser extends Thread
                     {
                         sendResponse("301", possible_target2.getNick() + " :" + possible_target2.getAway());
                     }
-                    possible_target2.sendCommand(new PreparedCommand(cmd, this));
+                    possible_target2.sendCommand(new IRCMessage(cmd, this));
                 } else {
                     sendResponse("401", cmd.getArg(0) + " :No such nick/channel");
                 }
@@ -379,7 +379,7 @@ public class IrcUser extends Thread
     }
     
     // Action functions
-    public void sendCommand(PreparedCommand pc)
+    public void sendCommand(IRCMessage pc)
     {
         this.connection.sendCommand(pc);
     }

@@ -1,7 +1,7 @@
 package org.openstatic.irc.gateways;
 
 import org.openstatic.irc.GatewayConnection;
-import org.openstatic.irc.PreparedCommand;
+import org.openstatic.irc.IRCMessage;
 import org.openstatic.irc.IrcServer;
 import org.openstatic.irc.IrcUser;
 import org.openstatic.http.HttpRequest;
@@ -90,7 +90,7 @@ public class WebAdminGatewayConnection extends Thread implements GatewayConnecti
         // Do Nothing
     }
     
-    public void sendCommand(PreparedCommand pc)
+    public void sendCommand(IRCMessage pc)
     {
         // Do Nothing
     }

@@ -70,6 +70,22 @@ public class IRCMessage
         this.source = source.toString();
         this.destination = null;
     }
+
+    public IRCMessage(IRCMessage msg, String source)
+    {
+        this.cmd = msg.getCommand();
+        this.args = msg.getArgs();
+        this.source = source;
+        this.destination = msg.getDestinations();
+    }
+    
+    public IRCMessage(IRCMessage msg, IrcUser source)
+    {
+        this.cmd = msg.getCommand();
+        this.args = msg.getArgs();
+        this.source = source.toString();
+        this.destination = msg.getDestinations();
+    }
     
     public IRCMessage()
     {
@@ -84,6 +100,12 @@ public class IRCMessage
     {
         this.args.add(value);
     }
+    
+    public void clearArgs()
+    {
+        this.args = new Vector<String>();
+    }
+
     
     // process that funny argument layout
     private Vector<String> doArgs(String[] ary, int start)
@@ -117,6 +139,11 @@ public class IRCMessage
     public void setSource(String value)
     {
         this.source = value;
+    }
+    
+    public void setSource(IrcUser u)
+    {
+        this.source = u.toString();
     }
     
     public void addDestination(IrcUser value)
@@ -195,6 +222,11 @@ public class IRCMessage
         } else {
             return null;
         }
+    }
+    
+    public Vector<String> getDestinations()
+    {
+        return this.destination;
     }
     
     // return the command like JOIN, PART, etc
@@ -281,7 +313,7 @@ public class IRCMessage
         return job;
     }
     
-    public static IRCMessage prepareMessage(String cmd)
+    public static IRCMessage prepare(String cmd)
     {
         IRCMessage newm = new IRCMessage();
         newm.setCommand(cmd);

@@ -1,7 +1,6 @@
 package org.openstatic.irc.gateways;
 
 import org.openstatic.irc.GatewayConnection;
-import org.openstatic.irc.PreparedCommand;
 import org.openstatic.irc.IrcUser;
 import org.openstatic.irc.IRCMessage;
 import java.net.Socket;
@@ -77,7 +76,7 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
                         IrcGatewayConnection.this.ping_countdown--;
                         if (IrcGatewayConnection.this.ping_countdown == 0)
                         {
-                            PreparedCommand ping = new PreparedCommand("PING");
+                            IRCMessage ping = IRCMessage.prepare("PING");
                             ping.addArg(IrcGatewayConnection.this.serverHostname);
                             IrcGatewayConnection.this.sendCommand(ping);
                         }
@@ -134,7 +133,7 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
         socketWrite(":" + this.serverHostname + " " + response + " " + this.ircUser.getNick() + " " + params + "\r\n");
     }
     
-    public void sendCommand(PreparedCommand pc)
+    public void sendCommand(IRCMessage pc)
     {
         String out = null;
         if (pc.getSource() != null)

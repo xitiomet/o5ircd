@@ -2,7 +2,6 @@ import org.openstatic.irc.IrcServer;
 import org.openstatic.irc.IrcUser;
 import org.openstatic.irc.IrcChannel;
 import org.openstatic.irc.IRCMessage;
-import org.openstatic.irc.PreparedCommand;
 import org.openstatic.irc.gateways.IrcGateway;
 import org.openstatic.irc.gateways.WebAdminGateway;
 import java.io.File;
@@ -69,7 +68,7 @@ public class IrcServerBase
                 {
                     System.out.println(possible_target2.getNick() + " :" + possible_target2.getAway());
                 }
-                possible_target2.sendCommand(new PreparedCommand(cmd));
+                possible_target2.sendCommand(cmd);
             } else {
                 System.out.println("No such nick: " + target);
             }
