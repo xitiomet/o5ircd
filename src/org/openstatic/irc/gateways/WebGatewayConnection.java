@@ -105,6 +105,16 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                                  "{\r\n" +
                                  "    ajaxFunction()\r\n" +
                                  "}\r\n" +
+                                 "function tothebottom()\r\n" +
+                                 "{\r\n" +
+                                 "    dh=document.body.scrollHeight;\r\n" +
+                                 "    ch=document.body.clientHeight;\r\n" +
+                                 "    if(dh>ch)\r\n" +
+                                 "    {\r\n" +
+                                 "        moveme=dh-ch;\r\n" +
+                                 "        window.scrollTo(0,moveme)\r\n" +
+                                 "    }\r\n" +
+                                 "}" +
                                  "function entsub(myform, event)\r\n" +
                                  "{\r\n" +
                                  "    if (event.keyCode == 13)\r\n" +
@@ -114,6 +124,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                                  "      msg = document.getElementById('message');\r\n" +
                                  "      chatarea.innerHTML += \"<b>" + this.ircUser.getNick() + "</b> -> <i>\" + document.getElementById('target').value + \"</i>: \" + msg.value + \"<br />\";\r\n" +
                                  "      msg.value = '';\r\n" +
+                                 "      tothebottom();\r\n" +
                                  "      return false;\r\n" +
                                  "    } else {\r\n"+
                                  "      return true;\r\n" +
@@ -134,8 +145,12 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                                  "        if (xmlhttp.readyState == 4)\r\n" +
                                  "        {\r\n" +
                                  "            chatarea = document.getElementById('chat_scroll');\r\n" +
-                                 "            chatarea.innerHTML += xmlhttp.responseText\r\n" +
-                                 "            document.getElementById('message').focus();\r\n" +
+                                 "            if (xmlhttp.responseText != '')\r\n" +
+                                 "            {\r\n" +
+                                 "              chatarea.innerHTML += xmlhttp.responseText\r\n" +
+                                 "              //document.getElementById('message').focus();\r\n" +
+                                 "              tothebottom()\r\n" +
+                                 "            }\r\n" +
                                  "            setTimeout('callAjax()', 10000);\r\n" +
                                  "        }\r\n" +
                                  "    }\r\n" +
@@ -145,7 +160,12 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                                  "</script></head>\r\n" +
                                  "<body onLoad=\"ajaxFunction()\"><h1>Openstatic.org Irc Server</h1>\r\n" +
                                  "<div id=\"chat_scroll\"></div>\r\n" +
-                                 "<form method=\"post\" target=\"hidden_iframe\" action=\"/post_action/\" id=\"chat_form\"><input name=\"command\" type=\"hidden\" value=\"PRIVMSG\"><input name=\"target\" id=\"target\" size=\"12\" value=\"\" type=\"text\"><input size=\"50\" type=\"text\" id=\"message\" name=\"message\" onkeypress=\"return entsub(this.form, event);\"><iframe name=\"hidden_iframe\" style=\"width: 0px; height: 0px; display: none;\"></iframe></form>\r\n" +
+                                 "<form method=\"post\" target=\"hidden_iframe\" action=\"/post_action/\" id=\"chat_form\"><div id=\"action_area\" style=\"border-style: solid; border-color: black; border-width: 1px; padding: 2px 2px 2px 2px;\">\r\n" +
+                                 "<input name=\"command\" type=\"hidden\" value=\"PRIVMSG\">\r\n" +
+                                 "target:<input name=\"target\" id=\"target\" size=\"12\" value=\"\" type=\"text\">\r\n" +
+                                 "message:<input size=\"50\" type=\"text\" id=\"message\" name=\"message\" onkeypress=\"return entsub(this.form, event);\">\r\n" +
+                                 "</div></form>\r\n" +
+                                 "<iframe name=\"hidden_iframe\" style=\"width: 0px; height: 0px; display: none;\"></iframe>\r\n" +
                                  "</body>\r\n" +
                                  "</html>\r\n");
                 nr.sendResponse(response);
@@ -178,7 +198,8 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
         PrintStream out = new PrintStream(this.ajax_buffer);
         if (pc.is("PRIVMSG"))
         {
-            out.println("<b>" + pc.getSourceNick() + "</b> -> <i>" + pc.getArg(0) + "</i>: " + pc.getArg(1) + "<br />");
+            String nc = pc.getSourceNick();
+            out.println("<b><a href=\"\" onClick=\"document.getElementById('target').value='" + nc + "'; document.getElementById('message').focus(); tothebottom(); return false;\">" + nc + "</a></b> -> <i>" + pc.getArg(0) + "</i>: " + pc.getArg(1) + "<br />");
         }
         out.flush();
     }
