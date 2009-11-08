@@ -3,7 +3,7 @@ import org.openstatic.irc.IrcUser;
 import org.openstatic.irc.IrcChannel;
 import org.openstatic.irc.IRCMessage;
 import org.openstatic.irc.gateways.IrcGateway;
-import org.openstatic.irc.gateways.WebAdminGateway;
+import org.openstatic.irc.gateways.WebGateway;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
@@ -139,7 +139,7 @@ public class IrcServerBase
                     try
                     {
                         int web_port = Integer.valueOf(arg_p1).intValue();
-                        irc.addGateway(new WebAdminGateway(web_port));
+                        irc.addGateway(new WebGateway(web_port));
                     } catch (Exception wa) {}
                 }
                 

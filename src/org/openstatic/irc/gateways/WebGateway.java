@@ -6,14 +6,14 @@ import org.openstatic.irc.Gateway;
 import org.openstatic.http.PlaceboHttpServer;
 import org.openstatic.http.PlaceboSession;
 
-public class WebAdminGateway extends Thread implements Gateway
+public class WebGateway extends Thread implements Gateway
 {
     private int port;
     private boolean keep_running;
     private IrcServer ircServer;
     private PlaceboHttpServer httpServer;
     
-    public WebAdminGateway(int port)
+    public WebGateway(int port)
     {
         this.port = port;
         this.ircServer = null;
@@ -26,7 +26,7 @@ public class WebAdminGateway extends Thread implements Gateway
         {
             this.keep_running = true;
             this.start();
-            this.ircServer.log("PORT: " + String.valueOf(this.port), 1, "WebAdmin Gateway Startup!");
+            this.ircServer.log("PORT: " + String.valueOf(this.port), 1, "WebGateway Startup!");
             return true;
         } else {
             return false;
@@ -57,15 +57,15 @@ public class WebAdminGateway extends Thread implements Gateway
             try
             {
                 PlaceboSession new_connection = httpServer.getNextSession();
-                WebAdminGatewayConnection wagc = new WebAdminGatewayConnection(new_connection, this.ircServer);
+                WebGatewayConnection wagc = new WebGatewayConnection(new_connection, this.ircServer);
                 wagc.start();
             } catch (Exception x) {}
         }
-        ircServer.log("PORT: " + String.valueOf(this.port), 1, "WebAdmin Gateway Shutdown");
+        ircServer.log("PORT: " + String.valueOf(this.port), 1, "WebGateway Shutdown");
     }
     
     public String toString()
     {
-        return "WebAdminGateway @ " + String.valueOf(this.port);
+        return "WebGateway @ " + String.valueOf(this.port);
     }
 }

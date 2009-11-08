@@ -297,6 +297,22 @@ public class IRCMessage
         return this.args.size();
     }
     
+    public String getSourceNick()
+    {
+        if (this.source != null)
+        {
+            int n = this.source.indexOf("!");
+            if (n > -1)
+            {
+                return this.source.substring(0, n);
+            } else {
+                return this.source;
+            }
+        } else {
+            return "Unknown";
+        }
+    }
+    
     public JSONObject toJSONObject()
     {
         JSONObject job = new JSONObject();

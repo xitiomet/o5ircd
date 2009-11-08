@@ -205,8 +205,10 @@ public class IrcUser extends Thread
             sendResponse("323", ":End of List");
             
         } else if (cmd.is("PRIVMSG") || cmd.is("NOTICE")) {
-            if (cmd.getArg(0).startsWith("#") || cmd.getArg(0).startsWith("&") || cmd.getArg(0).startsWith("!") || cmd.getArg(0).startsWith("+"))
+            if (cmd.getArg(0).startsWith("$"))
             {
+                // todo
+            } else if (cmd.getArg(0).startsWith("#") || cmd.getArg(0).startsWith("&") || cmd.getArg(0).startsWith("!") || cmd.getArg(0).startsWith("+")) {
                 IrcChannel possible_target = this.server.findChannel(cmd.getArg(0));
                 if (possible_target != null)
                 {
@@ -405,6 +407,7 @@ public class IrcUser extends Thread
         this.username = username;
         this.nickname = username;
         this.password = password;
+        this.welcomed = true;
         
     }
     
