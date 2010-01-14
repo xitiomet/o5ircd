@@ -120,6 +120,7 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
                 }
             } while (cmd_line != null && this.stay_connected);
             this.connection.close();
+	    this.ircUser.disconnect();
         } catch (Exception rex) {
             this.ircUser.getIrcServer().log(this.clientHostname, 1, "IrcGatewayConnection Exception: " + rex.toString() + " / " + rex.getMessage());
             this.ircUser.disconnect();

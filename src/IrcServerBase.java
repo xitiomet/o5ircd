@@ -24,6 +24,7 @@ public class IrcServerBase
         System.err.println("  --complex-chan [ini]           Create a channel from an ini file");
         System.err.println("  --chan [channel name]          create chanel (can be used multiple times)");
         System.err.println("  --motd [file]                  specify the motd filename");
+	System.err.println("  --cli                          Start in CLI mode");
         System.err.println("  --help                         display this menu");
         System.err.println("");
         System.err.println("");
@@ -231,6 +232,18 @@ public class IrcServerBase
                             System.out.println("Created Channel \"" + chan.toString() + "\"");
                         }
                     }
+
+		    if (cmd_ary[0].equals("drop"))
+		    {
+			IrcUser u = irc.findUser(cmd_ary[1]);
+			if (u != null)
+			{
+			    u.disconnect();
+			    System.out.println("Dropped Connection " + u.toString());
+			} else {
+			    System.out.println("Could not find" + cmd_ary[1]);
+			}
+		    }
                     
                     if (cmd_ary[0].equals("notice"))
                     {
