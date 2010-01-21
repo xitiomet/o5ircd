@@ -4,6 +4,7 @@ import org.openstatic.irc.IrcChannel;
 import org.openstatic.irc.IRCMessage;
 import org.openstatic.irc.gateways.IrcGateway;
 import org.openstatic.irc.gateways.WebGateway;
+import org.openstatic.irc.gateways.CLIGateway;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
@@ -24,7 +25,7 @@ public class IrcServerBase
         System.err.println("  --complex-chan [ini]           Create a channel from an ini file");
         System.err.println("  --chan [channel name]          create chanel (can be used multiple times)");
         System.err.println("  --motd [file]                  specify the motd filename");
-	System.err.println("  --cli                          Start in CLI mode");
+        System.err.println("  --cli                          Start in CLI mode");
         System.err.println("  --help                         display this menu");
         System.err.println("");
         System.err.println("");
@@ -42,37 +43,6 @@ public class IrcServerBase
             return props;
         } catch (Exception e) {
             return new Properties();
-        }
-    }
-    
-    // Sloppy function for sending messages from the CLI
-    public static void findAndSend(String command, IrcServer irc,  String source, String target, String message)
-    {
-        IRCMessage cmd = new IRCMessage(command, source);
-        cmd.addArg(target);
-        cmd.addArg(message);
-        
-        if (target.startsWith("#") || target.startsWith("&") || target.startsWith("!") || target.startsWith("+"))
-        {
-            IrcChannel possible_target = irc.findChannel(target);
-            if (possible_target != null)
-            {
-                possible_target.getHandler().onCommand(cmd, possible_target);
-            } else {
-                System.out.println("No such channel: " + target);
-            }
-        } else {
-            IrcUser possible_target2 = irc.findUser(target);
-            if (possible_target2 != null)
-            {
-                if (possible_target2.getAway() != null)
-                {
-                    System.out.println(possible_target2.getNick() + " :" + possible_target2.getAway());
-                }
-                possible_target2.sendCommand(cmd);
-            } else {
-                System.out.println("No such nick: " + target);
-            }
         }
     }
     
@@ -163,14 +133,18 @@ public class IrcServerBase
                 
                 if (arg.equals("--cli"))
                 {
-                    run_cli = true;
-                    join_thread = false;
-                    irc.setDebugStream(debug_target);
+                    try
+                    {
+                        int cli_port = Integer.valueOf(arg_p1).intValue();
+                        irc.addGateway(new CLIGateway(cli_port, debug_target));
+                        //irc.setDebugStream(debug_target);
+                    } catch (Exception wa) {}
                 }
                 
             }
             irc.start();
             Thread.sleep(1000);
+            /*
             if (run_cli)
             {
                 boolean do_input = true;
@@ -207,56 +181,9 @@ public class IrcServerBase
                     }
                     
                     String cmd_line = cmd_line_buffer.toString();
-                    String[] cmd_ary = cmd_line.split(" ");
-                    
-                    if (cmd_ary[0].equals("quit"))
-                    {
-                        do_input = false;
-                        irc.shutdown();
-                    }
-                    
-                    if (cmd_ary[0].equals("channel") && cmd_ary.length == 2)
-                    {
-                        IrcChannel chan = new IrcChannel(cmd_ary[1]);
-                        irc.addChannel(chan);
-                        System.out.println("Created Channel \"" + chan.toString() + "\"");
-                    }
-                    
-                    if (cmd_ary[0].equals("load"))
-                    {
-                        Properties l = loadProperties(cmd_ary[1]);
-                        if ("channel".equals(l.getProperty("config")))
-                        {
-                            IrcChannel chan = new IrcChannel(l);
-                            irc.addChannel(chan);
-                            System.out.println("Created Channel \"" + chan.toString() + "\"");
-                        }
-                    }
-
-		    if (cmd_ary[0].equals("drop"))
-		    {
-			IrcUser u = irc.findUser(cmd_ary[1]);
-			if (u != null)
-			{
-			    u.disconnect();
-			    System.out.println("Dropped Connection " + u.toString());
-			} else {
-			    System.out.println("Could not find" + cmd_ary[1]);
-			}
-		    }
-                    
-                    if (cmd_ary[0].equals("notice"))
-                    {
-                        findAndSend("NOTICE", irc, "CLI", cmd_ary[1], string_join(cmd_ary, 2, cmd_ary.length));
-                    }
-                    
-                    if (cmd_ary[0].equals("msg"))
-                    {
-                        findAndSend("PRIVMSG", irc, "CLI", cmd_ary[1], string_join(cmd_ary, 2, cmd_ary.length));
-                    }                    
                 }
             }
-
+                */    
             if (join_thread)
                 irc.join();
         }
