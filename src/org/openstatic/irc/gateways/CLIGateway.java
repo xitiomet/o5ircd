@@ -8,6 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.ByteArrayOutputStream;
 import java.util.Vector;
+import java.util.Enumeration;
 
 public class CLIGateway extends Thread implements Gateway
 {
@@ -17,6 +18,43 @@ public class CLIGateway extends Thread implements Gateway
     private ServerSocket ss;
     private ByteArrayOutputStream debug_feed;
     private Vector<CLIGatewayConnection> mySockets;
+    
+    public void watchByteStream(final ByteArrayOutputStream baos)
+    {
+        Thread t = new Thread()
+        {
+            public void run()
+            {
+                while (CLIGateway.this.keep_running)
+                {
+                    try
+                    {
+                        String debug_line = baos.toString("UTF-8");
+                        if (baos.size() > 0 && debug_line.indexOf("\n") != -1)
+                        {
+                            for (Enumeration<CLIGatewayConnection> e = CLIGateway.this.mySockets.elements() ; e.hasMoreElements() ;)
+                            {
+                                CLIGatewayConnection cgc = e.nextElement();
+                                cgc.clearPrompt();
+                                try
+                                {
+                                    baos.writeTo(cgc.getOutputStream());
+                                } catch (Exception ne) {
+                                    System.err.println(ne.getMessage());
+                                }
+                                cgc.showPrompt();
+                            }
+                            baos.reset();
+                        }
+                        Thread.sleep(500);
+                    } catch (Exception e) {
+                        System.err.println(e.getMessage());
+                    }
+                }
+            }
+        };
+        t.start();
+    }
     
     public CLIGateway(int port, ByteArrayOutputStream debug_feed)
     {
@@ -35,6 +73,7 @@ public class CLIGateway extends Thread implements Gateway
             this.keep_running = true;
             this.start();
             this.ircServer.log("PORT: " + String.valueOf(this.port), 1, "CLI Gateway Startup!");
+            watchByteStream(debug_feed);
             return true;
         } else {
             return false;
@@ -46,6 +85,11 @@ public class CLIGateway extends Thread implements Gateway
         this.keep_running = false;
         try
         {
+            for (Enumeration<CLIGatewayConnection> e = CLIGateway.this.mySockets.elements() ; e.hasMoreElements() ;)
+            {
+                CLIGatewayConnection cgc = e.nextElement();
+                cgc.close();
+            }
             this.ss.close();
             join();
         } catch (Exception ss_close) {}

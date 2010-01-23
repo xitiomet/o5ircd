@@ -153,6 +153,7 @@ public class IrcServer extends Thread
         this.users.add(u);
     }
     
+    // Should only be called by the disconnecting user
     public void removeUser(IrcUser conn)
     {
         int idx = users.indexOf(conn);
@@ -204,6 +205,16 @@ public class IrcServer extends Thread
         return null;
     }
     
+    public void removeChannel(IrcChannel chan)
+    {
+        int idx = rooms.indexOf(chan);
+        if (idx != -1)
+        {
+            rooms.remove(idx);
+            log("SERVER", 1, "Channel Removed \"" + chan.toString() + "\"");
+        }
+    }
+    
     public int getChannelCount()
     {
         return this.rooms.size();
@@ -250,6 +261,11 @@ public class IrcServer extends Thread
     public Vector<IrcChannel> getChannels()
     {
         return this.rooms;
+    }
+
+    public Vector<IrcUser> getUsers()
+    {
+        return this.users;
     }
     
     public void shutdown()

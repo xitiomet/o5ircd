@@ -72,6 +72,11 @@ public class IrcChannel implements MiddlewareHandler
     
     public void shutdown()
     {
+        for (Enumeration<IrcUser> e = this.members.elements(); e.hasMoreElements(); )
+        {
+            IrcUser cu = e.nextElement();
+            removeMember(cu);
+        }
         if (this.myHandler != null && this.myHandler != this)
         {
             this.myHandler.shutdown();
@@ -429,6 +434,11 @@ public class IrcChannel implements MiddlewareHandler
     }
     
     public String getHandlerDetails()
+    {
+        return this.channel_name;
+    }
+    
+    public String toString()
     {
         return this.channel_name;
     }
