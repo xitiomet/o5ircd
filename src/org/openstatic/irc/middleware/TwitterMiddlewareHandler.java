@@ -52,7 +52,8 @@ public class TwitterMiddlewareHandler implements MiddlewareHandler
                             String username = user.getString("screen_name");
                             String raw_irc = ":" + username + "!" + username + "@twitter.com PRIVMSG " + TwitterMiddlewareHandler.this.privmsg_to + " :" + message;
                             IRCMessage rc = new IRCMessage(raw_irc);
-                            TwitterMiddlewareHandler.this.middlewareHandler.onCommand(rc, TwitterMiddlewareHandler.this);
+                            if (TwitterMiddlewareHandler.this.middlewareHandler != null)
+                                TwitterMiddlewareHandler.this.middlewareHandler.onCommand(rc);
                         } catch (Exception ve) {}
                     } while (newLine != null && TwitterMiddlewareHandler.this.keep_running);
                     bread.close();
@@ -74,12 +75,18 @@ public class TwitterMiddlewareHandler implements MiddlewareHandler
         return c;
     }
     
-    public void onCommand(IRCMessage command, MiddlewareHandler middlewareHandler)
+    public void setNextHandler(MiddlewareHandler middlewareHandler)
     {
-        middlewareHandler.onCommand(command, this);
-        if (this.middlewareHandler == null || read_twitter.isAlive() == false)
+        this.middlewareHandler = middlewareHandler;
+        
+    }
+    
+    public void onCommand(IRCMessage command)
+    {
+        if (this.middlewareHandler != null)
+            this.middlewareHandler.onCommand(command);
+        if (read_twitter.isAlive() == false)
         {
-            this.middlewareHandler = middlewareHandler;
             read_twitter.start();
         }
     }

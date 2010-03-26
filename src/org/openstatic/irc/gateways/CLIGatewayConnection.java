@@ -40,7 +40,7 @@ public class CLIGatewayConnection extends Thread implements GatewayConnection
             IrcChannel possible_target = this.ircServer.findChannel(target);
             if (possible_target != null)
             {
-                possible_target.getHandler().onCommand(cmd, possible_target);
+                possible_target.getHandler().onCommand(cmd);
             } else {
                 this.println("No such channel: " + target);
             }

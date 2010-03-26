@@ -12,10 +12,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.Properties;
+import java.util.UUID;
 
 public class JsonHttpCH implements MiddlewareHandler
 {
     private URL url;
+    private UUID uuid;
     private int polling_time;
     private int polling_cycle;
     private MiddlewareHandler middlewareHandler;
@@ -24,6 +26,7 @@ public class JsonHttpCH implements MiddlewareHandler
     public JsonHttpCH(Properties setup)
     {
         this.keep_running = true;
+        this.uuid = UUID.randomUUID();
         try
         {
             this.url = new URL(setup.getProperty("url"));
@@ -66,7 +69,7 @@ public class JsonHttpCH implements MiddlewareHandler
         try
         {
             URLConnection conn = this.url.openConnection();
-            String data = URLEncoder.encode("poll", "UTF-8") + "=" + URLEncoder.encode("true", "UTF-8");
+            String data = URLEncoder.encode("uuid", "UTF-8") + "=" + URLEncoder.encode(this.uuid.toString()) + "&" + URLEncoder.encode("poll", "UTF-8") + "=" + URLEncoder.encode("true", "UTF-8");
             conn.setDoOutput(true);
             OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
             wr.write(data);
@@ -79,9 +82,17 @@ public class JsonHttpCH implements MiddlewareHandler
         }
     }
     
-    public void onCommand(IRCMessage command, MiddlewareHandler middlewareHandler)
+    // This is gonna be funny to explain, basically handlers will be chained together and pass
+    // messages along till they get to the reciever. Only problem is, if a handler breaks the
+    // while line of communication breaks
+    public void setNextHandler(MiddlewareHandler middlewareHandler)
     {
         this.middlewareHandler = middlewareHandler;
+    }
+    
+    // handlers will always be passed data from the onCommand method
+    public void onCommand(IRCMessage command)
+    {
         try
         {
             URLConnection conn = this.url.openConnection();
@@ -110,7 +121,7 @@ public class JsonHttpCH implements MiddlewareHandler
             
             job.put("meta", meta);
             
-            String data = URLEncoder.encode("json", "UTF-8") + "=" + URLEncoder.encode(job.toString(), "UTF-8");
+            String data = URLEncoder.encode("uuid", "UTF-8") + "=" + URLEncoder.encode(this.uuid.toString()) + "&" + URLEncoder.encode("json", "UTF-8") + "=" + URLEncoder.encode(job.toString(), "UTF-8");
             
             conn.setDoOutput(true);
             
@@ -173,7 +184,7 @@ public class JsonHttpCH implements MiddlewareHandler
                         rc.addDestination(dest.getString(da));
                     }
                 }
-                middlewareHandler.onCommand(rc, this);
+                this.middlewareHandler.onCommand(rc);
             }
         } catch (Exception x) {}
     }
@@ -195,7 +206,7 @@ public class JsonHttpCH implements MiddlewareHandler
 
     public String getHandlerDescription()
     {
-        return "OpenStatic.org JSON/HTTP Middleware";
+        return "OpenStatic.org JSON/HTTP Middleware (" + this.uuid.toString() + ")";
     }
     
     public String getHandlerDetails()

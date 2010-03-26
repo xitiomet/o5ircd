@@ -107,7 +107,7 @@ public class IrcUser extends Thread
             {
                 IrcChannel desired_channel = this.server.findChannel(cmd.getArg(0));
                 {
-                    desired_channel.getHandler().onCommand(cmd, desired_channel);
+                    desired_channel.getHandler().onCommand(cmd);
                 }
             }
         } else if (cmd.is("INVITE")) {
@@ -116,7 +116,7 @@ public class IrcUser extends Thread
                 IrcChannel desired_channel = this.server.findChannel(cmd.getArg(1));
                 if (desired_channel != null)
                 {
-                    desired_channel.getHandler().onCommand(cmd, desired_channel);
+                    desired_channel.getHandler().onCommand(cmd);
                 }
             }
         } else if (cmd.is("JOIN") || cmd.is("PART") || cmd.is("WHO") ) {
@@ -130,7 +130,7 @@ public class IrcUser extends Thread
                     {
                         if (cmd.is("JOIN"))
                             desired_channel.pendingJoin(this);
-                        desired_channel.getHandler().onCommand(cmd, desired_channel);
+                        desired_channel.getHandler().onCommand(cmd);
                     } else if (cmd.is("JOIN")) {
                         sendResponse("403", rooms[rms] + " :No IrcChannel Class to handle this request");
                     }
@@ -143,7 +143,7 @@ public class IrcUser extends Thread
                 IrcChannel desired_channel = this.server.findChannel(cmd.getArg(0));
                 if (desired_channel != null)
                 {
-                    desired_channel.getHandler().onCommand(cmd, desired_channel);
+                    desired_channel.getHandler().onCommand(cmd);
                 }
             }
         } else if (cmd.is("MODE")) {
@@ -153,7 +153,7 @@ public class IrcUser extends Thread
                 IrcChannel desired_channel = this.server.findChannel(cmd.getArg(0));
                 if (desired_channel != null)
                 {
-                    desired_channel.getHandler().onCommand(cmd, desired_channel);
+                    desired_channel.getHandler().onCommand(cmd);
                 }
 
             }
@@ -212,7 +212,7 @@ public class IrcUser extends Thread
                 IrcChannel possible_target = this.server.findChannel(cmd.getArg(0));
                 if (possible_target != null)
                 {
-                    possible_target.getHandler().onCommand(cmd, possible_target);
+                    possible_target.getHandler().onCommand(cmd);
                 } else {
                     sendResponse("401", cmd.getArg(0) + " :No such nick/channel");
                 }

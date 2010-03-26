@@ -37,7 +37,7 @@ public class StreamMiddlewareHandler implements MiddlewareHandler
                         IRCMessage rc = new IRCMessage(cmd_line);
                         if (rc.getSource() != null && StreamMiddlewareHandler.this.middlewareHandler != null)
                         {
-                            StreamMiddlewareHandler.this.middlewareHandler.onCommand(rc, StreamMiddlewareHandler.this);
+                            StreamMiddlewareHandler.this.middlewareHandler.onCommand(rc);
                         }
                     }
                 } catch (Exception n) {
@@ -48,13 +48,14 @@ public class StreamMiddlewareHandler implements MiddlewareHandler
         t.start();
     }
     
-    public void onCommand(IRCMessage command, MiddlewareHandler middlewareHandler)
+    public void setNextHandler(MiddlewareHandler middlewareHandler)
+    {
+        this.middlewareHandler = middlewareHandler;
+    }
+    
+    public void onCommand(IRCMessage command)
     {
         this.os.println(":" + command.getSource() + " " + command.toString());
-        if (this.middlewareHandler == null)
-        {
-            this.middlewareHandler = middlewareHandler;
-        }
     }
     
     public IrcUser findMember(String value)

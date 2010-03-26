@@ -20,8 +20,17 @@ $ make jvm
 
 This will create a version using the java vm instead of gcj
 
-2. Issues
+===================
+Possible Issues
+===================
 
+GCJ
+----
 Depending on your version of gcj and your environment setup you may have some trouble compiling
 please be sure that gcj, javac and jar are in you executable path. Also this program was developed
 using gcj 4.3, please be sure that you are using an up to date version of gcj.
+
+JSON
+----
+Also please note, GCJ may get cranky about the json libs, i have included gcj-json.jar just incase
+however the placebohttp.jar lib should have a full json.org implementation built in.

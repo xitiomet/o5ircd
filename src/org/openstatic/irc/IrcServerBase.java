@@ -1,3 +1,5 @@
+package org.openstatic.irc;
+
 import org.openstatic.irc.IrcServer;
 import org.openstatic.irc.IrcChannel;
 import org.openstatic.irc.gateways.IrcGateway;
@@ -14,15 +16,15 @@ public class IrcServerBase
 {
     public static void help()
     {
-        System.err.println("Openstatic.org IRC Server");
+        System.out.println("Openstatic.org IRC Server 3/2010");
         System.err.println("");
         System.err.println("  --debug                        Turn debugging output on.");
-        System.err.println("  --irc-port [port]              Specify IRC listening port");
+        System.err.println("  --irc [port]                   Specify IRC listening port");
         System.err.println("  --web [port]                   Start web administration on given port");
         System.err.println("  --complex-chan [ini]           Create a channel from an ini file");
         System.err.println("  --chan [channel name]          create chanel (can be used multiple times)");
         System.err.println("  --motd [file]                  specify the motd filename");
-        System.err.println("  --cli                          Start in CLI mode");
+        System.err.println("  --cli [port]                   Create CLI on specified port");
         System.err.println("  --help                         display this menu");
         System.err.println("");
         System.err.println("");
@@ -67,7 +69,7 @@ public class IrcServerBase
         {
             help();
         } else {
-            System.out.println("Openstatic.org IRC Server 1/2010");
+            System.out.println("Openstatic.org IRC Server 3/2010");
             boolean join_thread = true;
             
             for (int i = 0; i < args.length; i++)
@@ -85,7 +87,7 @@ public class IrcServerBase
                     irc.setDebug(Integer.valueOf(arg_p1).intValue());
                 }
                 
-                if (arg.equals("--irc-port") && arg_p1 != null)
+                if (arg.equals("--irc") && arg_p1 != null)
                 {
                     try
                     {

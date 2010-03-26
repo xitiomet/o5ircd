@@ -3,20 +3,32 @@ package org.openstatic.irc.middleware;
 import org.openstatic.irc.MiddlewareHandler;
 import org.openstatic.irc.IRCMessage;
 import org.openstatic.irc.IrcUser;
+import java.util.Properties;
 
 public class DefaultMiddlewareHandler implements MiddlewareHandler
 {
     private MiddlewareHandler middlewareHandler;
+    private Properties setup;
     
     public DefaultMiddlewareHandler()
     {
         this.middlewareHandler = null;
     }
     
-    public void onCommand(IRCMessage command, MiddlewareHandler middlewareHandler)
+    public DefaultMiddlewareHandler(Properties setup)
+    {
+        this.middlewareHandler = null;
+        this.setup = setup;
+    }
+    
+    public void setNextHandler(MiddlewareHandler middlewareHandler)
     {
         this.middlewareHandler = middlewareHandler;
-        middlewareHandler.onCommand(command, this);
+    }
+    
+    public void onCommand(IRCMessage command)
+    {
+        middlewareHandler.onCommand(command);
     }
     
     public IrcUser findMember(String value)

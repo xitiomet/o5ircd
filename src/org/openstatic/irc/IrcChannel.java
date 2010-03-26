@@ -16,18 +16,22 @@ public class IrcChannel implements MiddlewareHandler
     private Vector<IrcUser> pending_joins;
     private MiddlewareHandler myHandler;
     
+    private Vector<MiddlewareHandler> myMiddleware;
+    
     public IrcChannel(Properties setup)
     {
         this.channel_name = setup.getProperty("channel_name");
         this.topic = setup.getProperty("channel_topic");
         this.myHandler = null;
+        this.myMiddleware = new Vector<MiddlewareHandler>();
+        this.buildMiddlewareStack();
         if (setup.getProperty("middleware") != null)
         {
             try
             {
                 Class<?> c = Class.forName(setup.getProperty("middleware"));
                 Constructor<?> cons = c.getDeclaredConstructor(Properties.class);
-                this.myHandler = (MiddlewareHandler) cons.newInstance(setup);
+                this.addHandler((MiddlewareHandler) cons.newInstance(setup));
             } catch (Exception e) {}
         }
         this.members = new Vector<IrcUser>();
@@ -39,7 +43,9 @@ public class IrcChannel implements MiddlewareHandler
     {
         this.channel_name = name;
         this.topic = null;
-        this.myHandler = this;
+        this.myHandler = null;
+        this.myMiddleware = new Vector<MiddlewareHandler>();
+        this.buildMiddlewareStack();
         this.members = new Vector<IrcUser>();
         this.pending_joins = new Vector<IrcUser>();
         this.member_modes = new Hashtable<IrcUser, String>();
@@ -49,7 +55,9 @@ public class IrcChannel implements MiddlewareHandler
     {
         this.channel_name = name;
         this.topic = topic;
-        this.myHandler = this;
+        this.myHandler = null;
+        this.myMiddleware = new Vector<MiddlewareHandler>();
+        this.buildMiddlewareStack();
         this.members = new Vector<IrcUser>();
         this.pending_joins = new Vector<IrcUser>();
         this.member_modes = new Hashtable<IrcUser, String>();
@@ -65,6 +73,8 @@ public class IrcChannel implements MiddlewareHandler
         this.channel_name = name;
         this.topic = topic;
         this.myHandler = handler;
+        this.myMiddleware = new Vector<MiddlewareHandler>();
+        this.addHandler(handler);
         this.members = new Vector<IrcUser>();
         this.pending_joins = new Vector<IrcUser>();
         this.member_modes = new Hashtable<IrcUser, String>();
@@ -266,7 +276,7 @@ public class IrcChannel implements MiddlewareHandler
         return null;
     }
     
-    public void onCommand(IRCMessage receivedCommand, MiddlewareHandler middlewareHandler)
+    public void onCommand(IRCMessage receivedCommand)
     {
         IrcUser u = findMember(receivedCommand.getSource());
         if (receivedCommand.is("JOIN")) {
@@ -415,7 +425,51 @@ public class IrcChannel implements MiddlewareHandler
 
     public void setHandler(MiddlewareHandler mh)
     {
-        this.myHandler = mh;
+        this.myMiddleware.clear();
+        this.myMiddleware.add(mh);
+        this.buildMiddlewareStack();
+    }
+    
+    public void addHandler(MiddlewareHandler mh)
+    {
+        this.myMiddleware.add(mh);
+        this.buildMiddlewareStack();
+    }
+    
+    /* so IrcChannels are a special kind of middleware since they have
+       built in functionality for ordering and enumerating other middleware
+       for this very reason, IrcChannels could get cranky if this isn't done
+       properly
+       */
+    private void buildMiddlewareStack()
+    {
+        Enumeration<MiddlewareHandler> e = this.myMiddleware.elements();
+        
+        if (e.hasMoreElements())
+        {
+            this.myHandler = e.nextElement();
+            
+            System.err.println("MSTACK (0):" + this.myHandler.toString());
+            MiddlewareHandler mx = this.myHandler;
+            while (e.hasMoreElements())
+            {
+                MiddlewareHandler m = e.nextElement();
+                System.err.println("MSTACK (*):" + m.toString());
+                if (mx != null)
+                    mx.setNextHandler(m);
+                mx = m;
+            }
+            mx.setNextHandler(this);
+        } else {
+            System.err.println("No Middleware stack to create");
+            this.myHandler = this;
+        }
+    }
+    
+    // I hope this never happens.
+    public void setNextHandler(MiddlewareHandler middlewareHandler)
+    {
+        //this.myHandler = middlewareHandler;
     }
     
     public MiddlewareHandler getHandler()

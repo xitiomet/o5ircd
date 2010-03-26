@@ -62,7 +62,8 @@ public class StreamingJsonMiddlewareHandler implements MiddlewareHandler
                             String stream_message = StreamingJsonMiddlewareHandler.this.resolveField(json_object, "stream_data_message");
                             String raw_irc = ":" + stream_nickname + "!" + stream_username + "@" + stream_hostname + " PRIVMSG " + privmsg_to + " :" + stream_message;
                             IRCMessage rc = new IRCMessage(raw_irc);
-                            StreamingJsonMiddlewareHandler.this.middlewareHandler.onCommand(rc, StreamingJsonMiddlewareHandler.this);
+                            if (StreamingJsonMiddlewareHandler.this.middlewareHandler != null)
+                                StreamingJsonMiddlewareHandler.this.middlewareHandler.onCommand(rc);
                         } catch (Exception ve) {}
                     } while (newLine != null && StreamingJsonMiddlewareHandler.this.keep_running);
                     bread.close();
@@ -112,7 +113,12 @@ public class StreamingJsonMiddlewareHandler implements MiddlewareHandler
         return c;
     }
     
-    public void onCommand(IRCMessage command, MiddlewareHandler middlewareHandler)
+    public void setNextHandler(MiddlewareHandler middlewareHandler)
+    {
+        this.middlewareHandler = middlewareHandler;
+    }
+    
+    public void onCommand(IRCMessage command)
     {
         if (command.is("PRIVMSG"))
         {
@@ -143,12 +149,11 @@ public class StreamingJsonMiddlewareHandler implements MiddlewareHandler
                 } catch (Exception n) {}
             }
         } else {
-            middlewareHandler.onCommand(command, this);
+            this.middlewareHandler.onCommand(command);
         }
         
-        if (this.middlewareHandler == null || read_json.isAlive() == false)
+        if (read_json.isAlive() == false)
         {
-            this.middlewareHandler = middlewareHandler;
             read_json.start();
         }
     }
