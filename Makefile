@@ -13,7 +13,7 @@ all: ircd
 jvm:
 	mkdir jvm-build
 	javac -cp lib/json-gcj.jar:lib/placebohttp.jar:lib/smack.jar -d jvm-build src/org/openstatic/*.java src/org/openstatic/irc/*.java src/org/openstatic/irc/gateways/*.java src/org/openstatic/irc/middleware/*.java
-	jar -cvmf res/manifest.mf osircd.jar -C jvm-build org -C jvm-build IrcServerBase.class
+	jar -cvmf res/manifest.mf osircd.jar -C jvm-build org
 
 # Executable Rule for GCJ
 # -------------------------------------------------------------------------------

@@ -1,2 +1,2 @@
-Main-Class: IrcServerBase
+Main-Class: org.openstatic.irc.IrcServerBase
 Class-Path: lib/placebohttp.jar lib/json-gcj.jar
