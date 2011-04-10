@@ -72,7 +72,7 @@ public class IrcUser extends Thread
     }
     
     public void onGatewayCommand(IRCMessage cmd)
-    {   
+    {
         // we only want to set the command source if the user is fully authenticated.
         if (this.isWelcomed())
         {
