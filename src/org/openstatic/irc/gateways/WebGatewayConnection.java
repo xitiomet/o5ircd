@@ -108,16 +108,13 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
             nr.sendResponse(response);
         }
 
-        if (nr.getPath().equals("/ajax_updates/"))
+        if (nr.getPath().endsWith("/ajax_updates/"))
         {
             HttpResponse response = new HttpResponse();
             response.setContentType("text/html");
             response.setData(readBuffer(nr.getGetValue("target")));
             nr.sendResponse(response);
-        }
-
-        if (nr.getPath().equals("/part/"))
-        {
+        } else if (nr.getPath().endsWith("/part/")) {
             String target = nr.getGetValue("target");
             IRCMessage imessage = new IRCMessage("PART " + target);
             imessage.setSource(this.ircUser);
@@ -127,10 +124,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
             response.setContentType("text/html");
             response.setData("");
             nr.sendResponse(response);
-        }
-
-        if (nr.getPath().equals("/post_action/"))
-        {
+        } else if (nr.getPath().endsWith("/post_action/")) {
             String command = nr.getPostValue("command");
             String target = nr.getPostValue("target");
             String message = nr.getPostValue("message");
@@ -142,9 +136,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
             response.setContentType("text/html");
             response.setData("");
             nr.sendResponse(response);
-        }
-        if (nr.getPath().startsWith("/chat/") || nr.getPath().startsWith("/priv/"))
-        {
+        } else if (nr.getPath().startsWith("/chat/") || nr.getPath().startsWith("/priv/")) {
             if (!this.ircUser.isReady())
             {
                 String username = nr.getGetValue("username");
@@ -187,7 +179,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                              "    } else {\r\n" +
                              "        alert(\"Your browser does not support XMLHTTP!\");\r\n" +
                              "    }\r\n" +
-                             "    xmlhttp.open(\"GET\", \"/part/?target=" + encoded_target + "&PLACEBO_SESSIONID=" + nr.getPlaceboSession().getSessionId() + "\", true);\r\n" +
+                             "    xmlhttp.open(\"GET\", \"part/?target=" + encoded_target + "&PLACEBO_SESSIONID=" + nr.getPlaceboSession().getSessionId() + "\", true);\r\n" +
                              "    xmlhttp.send(null);\r\n" +
                              "}\r\n" +
                              "function callAjax()\r\n" +
@@ -243,13 +235,13 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                              "            setTimeout('callAjax()', 10000);\r\n" +
                              "        }\r\n" +
                              "    }\r\n" +
-                             "    xmlhttp.open(\"GET\", \"/ajax_updates/?target=" + encoded_target + "&PLACEBO_SESSIONID=" + nr.getPlaceboSession().getSessionId() + "\", true);\r\n" +
+                             "    xmlhttp.open(\"GET\", \"ajax_updates/?target=" + encoded_target + "&PLACEBO_SESSIONID=" + nr.getPlaceboSession().getSessionId() + "\", true);\r\n" +
                              "    xmlhttp.send(null);\r\n" +
                              "}\r\n" +
                              "</script></head>\r\n" +
                              "<body onLoad=\"setTimeout('callAjax()', 3000); document.getElementById('message').focus();\"><div style=\"border-style: solid; border-color: black; border-width: 1px; padding: 2px 2px 2px 2px; font-size: 24px;\">" + target + "</div>\r\n" +
                              "<div id=\"chat_scroll\"></div>\r\n" +
-                             "<form method=\"post\" target=\"hidden_iframe\" action=\"/post_action/?PLACEBO_SESSIONID=" + nr.getPlaceboSession().getSessionId() + "\" id=\"chat_form\"><div id=\"action_area\" style=\"border-style: solid; border-color: black; border-width: 1px; padding: 2px 2px 2px 2px;\">\r\n" +
+                             "<form method=\"post\" target=\"hidden_iframe\" action=\"post_action/?PLACEBO_SESSIONID=" + nr.getPlaceboSession().getSessionId() + "\" id=\"chat_form\"><div id=\"action_area\" style=\"border-style: solid; border-color: black; border-width: 1px; padding: 2px 2px 2px 2px;\">\r\n" +
                              "<input name=\"command\" type=\"hidden\" value=\"PRIVMSG\">\r\n" +
                              "<input name=\"target\" readonly=\"true\" style=\"border-style: none; text-align: right;\" id=\"target\" size=\"5\" value=\"" + target + "\" type=\"hidden\">\r\n" +
                              "<input style=\"border-style: none; width: 100%;\" type=\"text\" id=\"message\" name=\"message\" onkeypress=\"return entsub(this.form, event);\">\r\n" +
