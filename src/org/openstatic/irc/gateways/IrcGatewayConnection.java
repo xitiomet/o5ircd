@@ -76,12 +76,17 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
                         IrcGatewayConnection.this.ping_countdown--;
                         if (IrcGatewayConnection.this.ping_countdown == 0)
                         {
-                            IRCMessage ping = IRCMessage.prepare("PING");
-                            ping.addArg(IrcGatewayConnection.this.serverHostname);
-                            IrcGatewayConnection.this.sendCommand(ping);
+                            //IRCMessage ping = IRCMessage.prepare("PING");
+                            //ping.addArg(IrcGatewayConnection.this.serverHostname);
+                            //ping.addArg(IrcGatewayConnection.this.ircUser.getClientHostname());
+                            //IrcGatewayConnection.this.sendCommand(ping);
+                            IrcGatewayConnection.this.socketWrite("PING :" + IrcGatewayConnection.this.ircUser.getClientHostname() + "\r\n");
                         }
                         if (IrcGatewayConnection.this.ping_countdown == -15) // at 15 seconds after we send out a ping kick em
+                        {
                             IrcGatewayConnection.this.stay_connected = false;
+                            IrcGatewayConnection.this.ircUser.getIrcServer().log(IrcGatewayConnection.this.clientHostname, 1, "Ping Pong Timeout");
+                        }
                         try
                         {
                             Thread.sleep(1000);
@@ -114,6 +119,11 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
                     IRCMessage cmd = new IRCMessage(cmd_line);
                     if (cmd.is("PONG"))
                     {
+                        this.ping_countdown = 60;
+                    }
+                    if (cmd.is("PING"))
+                    {
+                        this.socketWrite("PONG " + cmd.getArg(0));
                         this.ping_countdown = 60;
                     }
                     this.ircUser.onGatewayCommand(cmd);

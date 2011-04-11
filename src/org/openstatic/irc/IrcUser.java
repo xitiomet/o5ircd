@@ -10,6 +10,8 @@ public class IrcUser extends Thread
     private String realname;
     private String away_message;
     private String password;
+    private String client_host;
+    private String domain;
     private boolean welcomed;
     private int idle_time;
     private boolean stay_connected;
@@ -322,7 +324,7 @@ public class IrcUser extends Thread
     
     public String getClientHostname()
     {
-        return this.connection.getClientHostname();
+        return this.client_host;
     }
     
     public GatewayConnection getGatewayConnection()
@@ -397,6 +399,8 @@ public class IrcUser extends Thread
         if (args.size() == 4)
         {
             this.username = args.elementAt(0);
+            this.domain = args.elementAt(1).replaceAll("\"","");
+            this.client_host = args.elementAt(2).replaceAll("\"","");
             this.realname = args.elementAt(3);
         }
     }
