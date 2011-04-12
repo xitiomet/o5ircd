@@ -57,6 +57,105 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                 WebGatewayConnection.this.handleRequest(nr);
         }
     }
+
+    public static String osTemplate(String title, String head, String body, String post_body)
+    {
+        return "<html>\r\n" +
+                             "<head>\r\n" +
+                             "<style type=\"text/css\">\r\n" +
+                             "p, li, blockquote, table\r\n" +
+                             "{\r\n" +
+                             "    margin-left: 12px;\r\n" +
+                             "    margin-right: 8px;\r\n" +
+                             "    margin-top: 0px;\r\n" +
+                             "    font-family: \"terminal\", monospace;\r\n" +
+                             "    font-size: .9em;\r\n" +
+                             "    line-height: 150%;\r\n" +
+                             "    text-align: left;\r\n" +
+                             "    width: 800px;\r\n" +
+                             "}\r\n" +
+                             "body\r\n" +
+                             "{\r\n" +
+                             "    padding: 0px 0px 0px 0px;\r\n" +
+                             "    margin: 0px 0px 0px 0px;\r\n" +
+                             "    background-color: #FFFFEE;\r\n" +
+                             "}\r\n" +
+                             "h1\r\n" +
+                             "{\r\n" +
+                             "    font-family: \"terminal\", monospace;\r\n" +
+                             "    font-size: 36px;\r\n" +
+                             "    text-shadow: 0.1em 0.1em 0.6em #FFFFFF;\r\n" +
+                             "    color: #EBEB00;\r\n" +
+                             "    line-height: 80%;\r\n" +
+                             "    letter-spacing: 4px;\r\n" +
+                             "    margin: 0px 0px 8px 0px;\r\n" +
+                             "    text-align: left;\r\n" +
+                             "}\r\n" +
+                             "div.headbar\r\n" +
+                             "{\r\n" +
+                             "    background-color: black;\r\n" +
+                             "    padding: 12px 12px 12px 12px;\r\n" +
+                             "    margin: 0px 0px 0px 0px;\r\n" +
+                             "    border-style: none;\r\n" +
+                             "    width: 800px;\r\n" +
+                             "}\r\n" +
+                             "div.nav\r\n" +
+                             "{\r\n" +
+                             "    background-color: #555555;\r\n" +
+                             "    padding: 4px 0px 4px 0px;\r\n" +
+                             "    margin: 0px 0px 0px 0px;\r\n" +
+                             "    border-style: solid;\r\n" +
+                             "    border-color: #777777;\r\n" +
+                             "    border-width: 1px;\r\n" +
+                             "    height: 23px;\r\n" +
+                             "    width: 822px;\r\n" +
+                             "}\r\n" +
+                             "div.nav a\r\n" +
+                             "{\r\n" +
+                             "    color: #FFFFFF;\r\n" +
+                             "    font-family: \"terminal\", monospace;\r\n" +
+                             "    text-decoration: none;\r\n" +
+                             "    border-style: solid;\r\n" +
+                             "    border-color: #BBBBBB;\r\n" +
+                             "    border-width: 1px;\r\n" +
+                             "    padding: 2px 6px 2px 6px;\r\n" +
+                             "}\r\n" +
+                             "div.nav a:hover\r\n" +
+                             "{\r\n" +
+                             "    background-color: #BBBBBB;\r\n" +
+                             "    color: #FF0000;\r\n" +
+                             "    font-family: \"terminal\", monospace;\r\n" +
+                             "    text-decoration: none;\r\n" +
+                             "    border-style: solid;\r\n" +
+                             "    border-color: #BBBBBB;\r\n" +
+                             "    border-width: 1px;\r\n" +
+                             "    padding: 2px 6px 2px 6px;\r\n" +
+                             "}\r\n" +
+                             "div.falsebody\r\n" +
+                             "{\r\n" +
+                             "    background-color: #F1F1F1;\r\n" +
+                             "    width: 818px;\r\n" +
+                             "    margin: 0px 0px 0px 0px;\r\n" +
+                             "    padding: 5px 3px 5px 3px;\r\n" +
+                             "    text-align: left;\r\n" +
+                             "}\r\n" +
+                             "</style>\r\n" + head +
+                             "</head>\r\n" +
+                             "<body onLoad=\"setTimeout('callAjax()', 3000); document.getElementById('message').focus();\">" +
+                             "<div align=\"center\"><br />" +
+                             "<div style=\"width: 824px; border-style: solid; border-width: 1px; border-color: black;\">" +
+                             "<div class=\"headbar\"><h1>" + title + "</h1></div>\r\n" +
+                             "<div class=\"nav\">\r\n" +
+                             "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\r\n" +
+                             "<tr><td align=\"left\">\r\n" +
+                             "</td><td align=\"right\">\r\n" +
+                             "<a href=\"http://openstatic.org/irc/\">o5ircd</a>\r\n" +
+                             "</td></tr></table>\r\n" +
+                             "</div>\r\n" +
+                             "<div class=\"falsebody\" id=\"chat_scroll\">" + body + "</div>\r\n" + post_body +
+                             "</div></div></body>\r\n" +
+                             "</html>\r\n";
+    }
     
     public void handleRequest(HttpRequest nr)
     {
@@ -78,14 +177,11 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
             } else {
                 HttpResponse response = new HttpResponse();
                 response.setContentType("text/html");
-                response.setData("<html>" +
-                                 "<body><h1>O5 IRC Server</h1>" +
-                                 "<form method=\"post\"><table>" +
+                response.setData(osTemplate("O5 IRC Server","",
+                                 "<form method=\"post\"><table style=\"width: 250px;\">" +
                                  "<tr><td>Username:</td><td><input type=\"text\" name=\"username\"></td></tr>" +
                                  "<tr><td></td><td align=\"right\"><input type=\"submit\" value=\"login\"></td></tr>" +
-                                 "</table></form>" +
-                                 "</body>" +
-                                 "</html>");
+                                 "</table></form>",""));
                 nr.sendResponse(response);
             }
         }
@@ -94,7 +190,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
         {
             HttpResponse response = new HttpResponse();
             response.setContentType("text/html");
-            String body = "<html><body><h1>Channels</h1>";
+            String body = "<p>";
             for (Enumeration<IrcChannel> e = this.ircServer.getChannels().elements(); e.hasMoreElements(); )
             {
                 IrcChannel room = e.nextElement();
@@ -103,8 +199,8 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                     body += "<a href=\"/chat/" + URLEncoder.encode(room.getName(), "UTF-8") + "/\">" + room.getName() + "</a> " + room.getTopic() + "<br />";
                 } catch (Exception url_enc_exc) {}
             }
-            body += "</body></html>";
-            response.setData(body);
+            body += "</p>";
+            response.setData(osTemplate("Channels","",body,""));
             nr.sendResponse(response);
         }
 
@@ -167,8 +263,8 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
             }
             HttpResponse response = new HttpResponse();
             response.setContentType("text/html");
-            response.setData("<html>" +
-                             "<head><script type=\"text/javascript\">\r\n" +
+            response.setData(osTemplate(target,
+                             "<script type=\"text/javascript\">\r\n" +
                              "window.onbeforeunload = function()"+
                              "{\r\n" +
                              "    var xmlhttp;\r\n" +
@@ -238,17 +334,14 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                              "    xmlhttp.open(\"GET\", \"ajax_updates/?target=" + encoded_target + "&PLACEBO_SESSIONID=" + nr.getPlaceboSession().getSessionId() + "\", true);\r\n" +
                              "    xmlhttp.send(null);\r\n" +
                              "}\r\n" +
-                             "</script></head>\r\n" +
-                             "<body onLoad=\"setTimeout('callAjax()', 3000); document.getElementById('message').focus();\"><div style=\"border-style: solid; border-color: black; border-width: 1px; padding: 2px 2px 2px 2px; font-size: 24px;\">" + target + "</div>\r\n" +
-                             "<div id=\"chat_scroll\"></div>\r\n" +
-                             "<form method=\"post\" target=\"hidden_iframe\" action=\"post_action/?PLACEBO_SESSIONID=" + nr.getPlaceboSession().getSessionId() + "\" id=\"chat_form\"><div id=\"action_area\" style=\"border-style: solid; border-color: black; border-width: 1px; padding: 2px 2px 2px 2px;\">\r\n" +
+                             "</script>", "",
+                             "<form style=\"margin-bottom: 0;\" method=\"post\" target=\"hidden_iframe\" action=\"post_action/?PLACEBO_SESSIONID=" + nr.getPlaceboSession().getSessionId() + "\" id=\"chat_form\">" +
+                             "<div id=\"action_area\" style=\"border-top-style: solid; border-top-color: black; border-top-width: 1px; padding: 0px 0px 0px 0px;\">\r\n" +
                              "<input name=\"command\" type=\"hidden\" value=\"PRIVMSG\">\r\n" +
                              "<input name=\"target\" readonly=\"true\" style=\"border-style: none; text-align: right;\" id=\"target\" size=\"5\" value=\"" + target + "\" type=\"hidden\">\r\n" +
                              "<input style=\"border-style: none; width: 100%;\" type=\"text\" id=\"message\" name=\"message\" onkeypress=\"return entsub(this.form, event);\">\r\n" +
                              "</div></form>\r\n" +
-                             "<iframe name=\"hidden_iframe\" id=\"hidden_iframe\" style=\"width: 0px; height: 0px; display: none;\"></iframe>\r\n" +
-                             "</body>\r\n" +
-                             "</html>\r\n");
+                             "<iframe name=\"hidden_iframe\" id=\"hidden_iframe\" style=\"width: 0px; height: 0px; display: none;\"></iframe>\r\n"));
             nr.sendResponse(response);
         }
     }
