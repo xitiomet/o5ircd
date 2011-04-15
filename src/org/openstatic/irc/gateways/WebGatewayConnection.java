@@ -88,84 +88,8 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
     {
         return "<html>\r\n" +
                              "<head>\r\n" +
-                             "<style type=\"text/css\">\r\n" +
-                             "p, li, blockquote, table\r\n" +
-                             "{\r\n" +
-                             "    margin-left: 12px;\r\n" +
-                             "    margin-right: 8px;\r\n" +
-                             "    margin-top: 0px;\r\n" +
-                             "    font-family: \"terminal\", monospace;\r\n" +
-                             "    font-size: .9em;\r\n" +
-                             "    line-height: 150%;\r\n" +
-                             "    text-align: left;\r\n" +
-                             "    width: 800px;\r\n" +
-                             "}\r\n" +
-                             "body\r\n" +
-                             "{\r\n" +
-                             "    padding: 0px 0px 0px 0px;\r\n" +
-                             "    margin: 0px 0px 0px 0px;\r\n" +
-                             "    background-color: #FFFFEE;\r\n" +
-                             "}\r\n" +
-                             "h1\r\n" +
-                             "{\r\n" +
-                             "    font-family: \"terminal\", monospace;\r\n" +
-                             "    font-size: 36px;\r\n" +
-                             "    text-shadow: 0.1em 0.1em 0.6em #FFFFFF;\r\n" +
-                             "    color: #EBEB00;\r\n" +
-                             "    line-height: 80%;\r\n" +
-                             "    letter-spacing: 4px;\r\n" +
-                             "    margin: 0px 0px 8px 0px;\r\n" +
-                             "    text-align: left;\r\n" +
-                             "}\r\n" +
-                             "div.headbar\r\n" +
-                             "{\r\n" +
-                             "    background-color: black;\r\n" +
-                             "    padding: 12px 12px 12px 12px;\r\n" +
-                             "    margin: 0px 0px 0px 0px;\r\n" +
-                             "    border-style: none;\r\n" +
-                             "    width: 800px;\r\n" +
-                             "}\r\n" +
-                             "div.nav\r\n" +
-                             "{\r\n" +
-                             "    background-color: #555555;\r\n" +
-                             "    padding: 4px 0px 4px 0px;\r\n" +
-                             "    margin: 0px 0px 0px 0px;\r\n" +
-                             "    border-style: solid;\r\n" +
-                             "    border-color: #777777;\r\n" +
-                             "    border-width: 1px;\r\n" +
-                             "    height: 23px;\r\n" +
-                             "    width: 822px;\r\n" +
-                             "}\r\n" +
-                             "div.nav a\r\n" +
-                             "{\r\n" +
-                             "    color: #FFFFFF;\r\n" +
-                             "    font-family: \"terminal\", monospace;\r\n" +
-                             "    text-decoration: none;\r\n" +
-                             "    border-style: solid;\r\n" +
-                             "    border-color: #BBBBBB;\r\n" +
-                             "    border-width: 1px;\r\n" +
-                             "    padding: 2px 6px 2px 6px;\r\n" +
-                             "}\r\n" +
-                             "div.nav a:hover\r\n" +
-                             "{\r\n" +
-                             "    background-color: #BBBBBB;\r\n" +
-                             "    color: #FF0000;\r\n" +
-                             "    font-family: \"terminal\", monospace;\r\n" +
-                             "    text-decoration: none;\r\n" +
-                             "    border-style: solid;\r\n" +
-                             "    border-color: #BBBBBB;\r\n" +
-                             "    border-width: 1px;\r\n" +
-                             "    padding: 2px 6px 2px 6px;\r\n" +
-                             "}\r\n" +
-                             "div.falsebody\r\n" +
-                             "{\r\n" +
-                             "    background-color: #F1F1F1;\r\n" +
-                             "    width: 818px;\r\n" +
-                             "    margin: 0px 0px 0px 0px;\r\n" +
-                             "    padding: 5px 3px 5px 3px;\r\n" +
-                             "    text-align: left;\r\n" +
-                             "}\r\n" +
-                             "</style>\r\n" + head +
+                             "<link rel=\"stylesheet\" type=\"text/css\" href=\"wgc.css\" title=\"openstatic\" />\r\n" +
+                             head +
                              "</head>\r\n" +
                              "<body onLoad=\"setTimeout('callAjax()', 3000); document.getElementById('message').focus();\">" +
                              "<div align=\"center\"><br />" +
@@ -237,8 +161,14 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
             response.setData(osTemplate("Channels","",body,""));
             nr.sendResponse(response);
         }
+        if (nr.getPath().endsWith("/wgc.css"))
+        {
+            HttpResponse response = new HttpResponse();
+            response.setData(getClass().getResourceAsStream("/www/openstatic.css"),"text/css");
+            nr.sendResponse(response);
+        }
 
-        if (nr.getPath().endsWith("/ajax_updates/"))
+        if (nr.getPath().endsWith("/updates/"))
         {
             HttpResponse response = new HttpResponse();
             response.setContentType("text/html");
@@ -365,7 +295,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                              "            setTimeout('callAjax()', 10000);\r\n" +
                              "        }\r\n" +
                              "    }\r\n" +
-                             "    xmlhttp.open(\"GET\", \"ajax_updates/?target=" + encoded_target + "&PLACEBO_SESSIONID=" + this.connection.getSessionId() + "\", true);\r\n" +
+                             "    xmlhttp.open(\"GET\", \"updates/?target=" + encoded_target + "&PLACEBO_SESSIONID=" + this.connection.getSessionId() + "\", true);\r\n" +
                              "    xmlhttp.send(null);\r\n" +
                              "}\r\n" +
                              "</script>", "",

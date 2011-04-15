@@ -13,7 +13,7 @@ all: ircd
 jvm:
 	mkdir jvm-build
 	javac -cp lib/json-gcj.jar:lib/placebohttp.jar:lib/smack.jar -d jvm-build src/org/openstatic/*.java src/org/openstatic/irc/*.java src/org/openstatic/irc/gateways/*.java src/org/openstatic/irc/middleware/*.java
-	jar -cvmf res/manifest.mf osircd.jar -C jvm-build org
+	jar -cvmf res/manifest.mf osircd.jar -C jvm-build org -C res www
 
 # Executable Rule for GCJ
 # -------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ build/org/openstatic/irc/middleware/JsonHttpCH.class: src/org/openstatic/irc/mid
 # -------------------------------------------------------------------------------
 
 osircd.jar: build/org/openstatic/irc/IrcServer.class build/org/openstatic/irc/IRCMessage.class build/org/openstatic/irc/IrcUser.class build/org/openstatic/irc/IrcChannel.class build/org/openstatic/irc/MiddlewareHandler.class build/org/openstatic/irc/middleware/DefaultMiddlewareHandler.class build/org/openstatic/irc/middleware/StreamMiddlewareHandler.class build/org/openstatic/irc/middleware/JsonHttpCH.class build/org/openstatic/irc/GatewayConnection.class build/org/openstatic/irc/Gateway.class build/org/openstatic/irc/gateways/IrcGatewayConnection.class build/org/openstatic/irc/gateways/IrcGateway.class build/org/openstatic/irc/gateways/WebGatewayConnection.class build/org/openstatic/irc/gateways/WebGateway.class build/org/openstatic/irc/middleware/TwitterMiddlewareHandler.class build/org/openstatic/irc/middleware/StreamingJsonMiddlewareHandler.class build/org/openstatic/Base64Coder.class build/org/openstatic/irc/IrcServerBase.class build/org/openstatic/irc/gateways/CLIGatewayConnection.class build/org/openstatic/irc/gateways/CLIGateway.class
-	$(JAR) -cvmf res/manifest.mf $@ -C build org
+	$(JAR) -cvmf res/manifest.mf $@ -C build org -C res www
 
 clean:
 	rm -fR build
