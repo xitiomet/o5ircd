@@ -25,6 +25,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
     private Hashtable<String, ByteArrayOutputStream> ajax_buffer;
     private Hashtable<String, Integer> room_timeout;
     private int lastRequestDelay;    
+    private String clientHostname;
 
     public WebGatewayConnection(PlaceboSession connection, IrcServer ircServer)
     {
@@ -63,7 +64,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                     {
                         Thread.sleep(1000);
                     } catch (Exception e) {}
-                    if (WebGatewayConnection.this.lastRequestDelay > 60)
+                    if (WebGatewayConnection.this.lastRequestDelay > 20)
                     {
                         WebGatewayConnection.this.ircUser.disconnect();
                     }
@@ -80,6 +81,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                 WebGatewayConnection.this.handleRequest(nr);
             }
         }
+        this.ircUser.getIrcServer().log(this.clientHostname, 1, "WebGatewayConnection Thread Exiting!");
     }
 
     public static String osTemplate(String title, String head, String body, String post_body)
@@ -183,12 +185,12 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
     
     public void handleRequest(HttpRequest nr)
     {
-        String client_ip = nr.getHttpHeader("X-Real-IP");
-        if (client_ip == null)
-            client_ip = this.connection.getClientHostname();
+        this.clientHostname = nr.getHttpHeader("X-Real-IP");
+        if (this.clientHostname == null)
+            this.clientHostname = this.connection.getClientHostname();
 
-        if (client_ip == null)
-            client_ip = "unknown-host";
+        if (this.clientHostname == null)
+            this.clientHostname = "unknown-host";
             
         if (nr.getPath().equals("/") && !this.ircUser.isReady())
         {
@@ -197,7 +199,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
             if (username != null)
             {
                 this.ircUser.loginUser(username, password);
-                this.ircUser.setClientHost(client_ip);
+                this.ircUser.setClientHost(this.clientHostname);
                 Vector<String> motd = this.ircServer.getMotd();
                 if (motd != null)
                 {
@@ -259,7 +261,6 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
             IRCMessage imessage = new IRCMessage(command + " " + target + " :" + message);
             imessage.setSource(this.ircUser);
             this.ircUser.onGatewayCommand(imessage);
-            
             HttpResponse response = new HttpResponse();
             response.setContentType("text/html");
             response.setData("");
@@ -271,6 +272,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                 if (username == null)
                     username = "webuser-" + generateBigAlphaKey(5);
                 this.ircUser.loginUser(username, null);
+                this.ircUser.setClientHost(this.clientHostname);
             }
             String path_tokens = nr.getPath().substring(6);
             StringTokenizer st = new StringTokenizer(path_tokens, "/");
@@ -443,6 +445,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
     
     public void sendCommand(IRCMessage pc)
     {
+        this.ircUser.getIrcServer().log(this.clientHostname, 5, "<- " + pc.toString());
         String nc = pc.getSourceNick();
         if (pc.is("PRIVMSG"))
         {

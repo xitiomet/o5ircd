@@ -47,7 +47,7 @@ public class WebGateway extends Thread implements Gateway
     {
         httpServer = new PlaceboHttpServer(this.port);
         httpServer.setDebugStream(this.ircServer.getDebugStream());
-        if (this.ircServer.getDebug() >= 2)
+        if (this.ircServer.getDebug() >= 10)
         {
             httpServer.setDebug(true);
         }
