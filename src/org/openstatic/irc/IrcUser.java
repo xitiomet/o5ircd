@@ -382,6 +382,11 @@ public class IrcUser extends Thread
     {
         this.username = username;
     }
+
+    public void setClientHost(String value)
+    {
+        this.client_host = value;
+    }
     
     // Action functions
     public void sendCommand(IRCMessage pc)

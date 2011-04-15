@@ -24,7 +24,8 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
     private IrcUser ircUser;
     private Hashtable<String, ByteArrayOutputStream> ajax_buffer;
     private Hashtable<String, Integer> room_timeout;
-    
+    private int lastRequestDelay;    
+
     public WebGatewayConnection(PlaceboSession connection, IrcServer ircServer)
     {
         this.connection = connection;
@@ -34,6 +35,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
         this.ircUser.initGatewayConnection(this);
         this.ircServer.addUser(this.ircUser);
         this.ircServer.log(this.connection.getClientHostname(), 1, "*** Initialized new WebGateway Connection");
+        this.lastRequestDelay = 0;
     }
     
     private String generateBigAlphaKey(int key_length)
@@ -50,11 +52,33 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
 
     public void run()
     {
+        Thread pingPong = new Thread()
+        {
+            public void run()
+            {
+                while (connection.isActive())
+                {
+                    WebGatewayConnection.this.lastRequestDelay++;
+                    try
+                    {
+                        Thread.sleep(1000);
+                    } catch (Exception e) {}
+                    if (WebGatewayConnection.this.lastRequestDelay > 60)
+                    {
+                        WebGatewayConnection.this.ircUser.disconnect();
+                    }
+                }
+            }
+        };
+        pingPong.start();
         while (connection.isActive())
         {
             HttpRequest nr = connection.getNextRequest();
             if (nr != null)
+            {
+                this.lastRequestDelay = 0;
                 WebGatewayConnection.this.handleRequest(nr);
+            }
         }
     }
 
@@ -159,6 +183,13 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
     
     public void handleRequest(HttpRequest nr)
     {
+        String client_ip = nr.getHttpHeader("X-Real-IP");
+        if (client_ip == null)
+            client_ip = this.connection.getClientHostname();
+
+        if (client_ip == null)
+            client_ip = "unknown-host";
+            
         if (nr.getPath().equals("/") && !this.ircUser.isReady())
         {
             String username = nr.getPostValue("username");
@@ -166,6 +197,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
             if (username != null)
             {
                 this.ircUser.loginUser(username, password);
+                this.ircUser.setClientHost(client_ip);
                 Vector<String> motd = this.ircServer.getMotd();
                 if (motd != null)
                 {
@@ -275,7 +307,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                              "    } else {\r\n" +
                              "        alert(\"Your browser does not support XMLHTTP!\");\r\n" +
                              "    }\r\n" +
-                             "    xmlhttp.open(\"GET\", \"part/?target=" + encoded_target + "&PLACEBO_SESSIONID=" + nr.getPlaceboSession().getSessionId() + "\", true);\r\n" +
+                             "    xmlhttp.open(\"GET\", \"part/?target=" + encoded_target + "&PLACEBO_SESSIONID=" + this.connection.getSessionId() + "\", true);\r\n" +
                              "    xmlhttp.send(null);\r\n" +
                              "}\r\n" +
                              "function callAjax()\r\n" +
@@ -331,7 +363,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                              "            setTimeout('callAjax()', 10000);\r\n" +
                              "        }\r\n" +
                              "    }\r\n" +
-                             "    xmlhttp.open(\"GET\", \"ajax_updates/?target=" + encoded_target + "&PLACEBO_SESSIONID=" + nr.getPlaceboSession().getSessionId() + "\", true);\r\n" +
+                             "    xmlhttp.open(\"GET\", \"ajax_updates/?target=" + encoded_target + "&PLACEBO_SESSIONID=" + this.connection.getSessionId() + "\", true);\r\n" +
                              "    xmlhttp.send(null);\r\n" +
                              "}\r\n" +
                              "</script>", "",
@@ -358,7 +390,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
     
     public void close()
     {
-        connection.endSession();
+        this.connection.endSession();
     }
     
     public void sendResponse(String response, String params)
@@ -418,7 +450,16 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
             {
                 writeToBuffer(nc, "<b>" + nc + "</b>: " + pc.getArg(1) + "<br />");
             } else {
-                writeToBuffer(pc.getArg(0), "<b><a href=\"/priv/" + nc + "/\" target=\"__blank\">" + nc + "</a></b>: " + pc.getArg(1) + "<br />");
+                writeToBuffer(pc.getArg(0), "<b><a href=\"/priv/" + nc + "/?PLACEBO_SESSIONID=" + this.connection.getSessionId() + "\" target=\"__blank\">" + nc + "</a></b>: " + pc.getArg(1) + "<br />");
+            }
+        }
+        if (pc.is("NOTICE"))
+        {
+            if (pc.getArg(0).equals(this.ircUser.getNick()))
+            {
+                writeToBuffer(nc, "NOTICE (<b>" + nc + "</b>): " + pc.getArg(1) + "<br />");
+            } else {
+                writeToBuffer(pc.getArg(0), "NOTICE (<b><a href=\"/priv/" + nc + "/?PLACEBO_SESSIONID=" + this.connection.getSessionId() + "\" target=\"__blank\">" + nc + "</a></b>): " + pc.getArg(1) + "<br />");
             }
         }
         if (pc.is("JOIN"))
@@ -429,11 +470,13 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
         {
             writeToBuffer(pc.getArg(0), "<b style=\"color: #550000;\">*** " + nc + " Left Channel :" + pc.getArg(0) + "</b><br />");
         }
+        if (pc.is("QUIT"))
+        {
+            writeToBuffer(pc.getArg(0), "<b style=\"color: #550000;\">*** " + nc + " QUIT IRC :" + pc.getArg(0) + "</b><br />");
+        }
         if (pc.is("TOPIC"))
         {
-            writeToBuffer(pc.getArg(0), "<b style=\"color: #550000;\">*** " + nc + " changed the topic to: " + pc.getArg(1) + "</b><br />");
+            writeToBuffer(pc.getArg(0), "<b style=\"color: #000055;\">*** " + nc + " changed the topic to: " + pc.getArg(1) + "</b><br />");
         }
     }
-    
-
 }

@@ -84,7 +84,7 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
                         }
                         if (IrcGatewayConnection.this.ping_countdown == -15) // at 15 seconds after we send out a ping kick em
                         {
-                            IrcGatewayConnection.this.stay_connected = false;
+                            IrcGatewayConnection.this.ircUser.disconnect();
                             IrcGatewayConnection.this.ircUser.getIrcServer().log(IrcGatewayConnection.this.clientHostname, 1, "Ping Pong Timeout");
                         }
                         try
