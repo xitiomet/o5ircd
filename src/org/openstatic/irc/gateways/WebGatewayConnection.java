@@ -64,7 +64,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
                     {
                         Thread.sleep(1000);
                     } catch (Exception e) {}
-                    if (WebGatewayConnection.this.lastRequestDelay > 20)
+                    if (WebGatewayConnection.this.lastRequestDelay > 40)
                     {
                         WebGatewayConnection.this.ircUser.disconnect();
                     }
@@ -87,24 +87,24 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
     public static String osTemplate(String title, String head, String body, String post_body)
     {
         return "<html>\r\n" +
-                             "<head>\r\n" +
-                             "<link rel=\"stylesheet\" type=\"text/css\" href=\"wgc.css\" title=\"openstatic\" />\r\n" +
-                             head +
-                             "</head>\r\n" +
-                             "<body onLoad=\"setTimeout('callAjax()', 3000); document.getElementById('message').focus();\">" +
-                             "<div align=\"center\"><br />" +
-                             "<div style=\"width: 824px; border-style: solid; border-width: 1px; border-color: black;\">" +
-                             "<div class=\"headbar\"><h1>" + title + "</h1></div>\r\n" +
-                             "<div class=\"nav\">\r\n" +
-                             "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\r\n" +
-                             "<tr><td align=\"left\">\r\n" +
-                             "</td><td align=\"right\">\r\n" +
-                             "<a href=\"http://openstatic.org/irc/\">o5ircd</a>\r\n" +
-                             "</td></tr></table>\r\n" +
-                             "</div>\r\n" +
-                             "<div class=\"falsebody\" id=\"chat_scroll\">" + body + "</div>\r\n" + post_body +
-                             "</div></div></body>\r\n" +
-                             "</html>\r\n";
+                 "<head>\r\n" +
+                 "<link rel=\"stylesheet\" type=\"text/css\" href=\"wgc.css\" title=\"openstatic\" />\r\n" +
+                 head +
+                 "</head>\r\n" +
+                 "<body onLoad=\"setTimeout('callAjax()', 3000); document.getElementById('message').focus();\">" +
+                 "<div align=\"center\"><br />" +
+                 "<div style=\"width: 824px; border-style: solid; border-width: 1px; border-color: black;\">" +
+                 "<div class=\"headbar\"><h1>" + title + "</h1></div>\r\n" +
+                 "<div class=\"nav\">\r\n" +
+                 "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\r\n" +
+                 "<tr><td align=\"left\">\r\n" +
+                 "</td><td align=\"right\">\r\n" +
+                 "<a href=\"http://openstatic.org/irc/\">o5ircd</a>\r\n" +
+                 "</td></tr></table>\r\n" +
+                 "</div>\r\n" +
+                 "<div class=\"falsebody\" id=\"chat_scroll\">" + body + "</div>\r\n" + post_body +
+                 "</div></div></body>\r\n" +
+                 "</html>\r\n";
     }
     
     public void handleRequest(HttpRequest nr)
@@ -161,15 +161,13 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
             response.setData(osTemplate("Channels","",body,""));
             nr.sendResponse(response);
         }
+
         if (nr.getPath().endsWith("/wgc.css"))
         {
             HttpResponse response = new HttpResponse();
             response.setData(getClass().getResourceAsStream("/www/openstatic.css"),"text/css");
             nr.sendResponse(response);
-        }
-
-        if (nr.getPath().endsWith("/updates/"))
-        {
+        } else if (nr.getPath().endsWith("/updates/")) {
             HttpResponse response = new HttpResponse();
             response.setContentType("text/html");
             response.setData(readBuffer(nr.getGetValue("target")));
@@ -383,7 +381,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
             {
                 writeToBuffer(nc, "<b>" + nc + "</b>: " + pc.getArg(1) + "<br />");
             } else {
-                writeToBuffer(pc.getArg(0), "<b><a href=\"/priv/" + nc + "/?PLACEBO_SESSIONID=" + this.connection.getSessionId() + "\" target=\"__blank\">" + nc + "</a></b>: " + pc.getArg(1) + "<br />");
+                writeToBuffer(pc.getArg(0), "<b><a href=\"/priv/" + nc + "/?PLACEBO_SESSIONID=" + this.connection.getSessionId() + "\" target=\"_blank\">" + nc + "</a></b>: " + pc.getArg(1) + "<br />");
             }
         }
         if (pc.is("NOTICE"))
@@ -392,7 +390,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
             {
                 writeToBuffer(nc, "NOTICE (<b>" + nc + "</b>): " + pc.getArg(1) + "<br />");
             } else {
-                writeToBuffer(pc.getArg(0), "NOTICE (<b><a href=\"/priv/" + nc + "/?PLACEBO_SESSIONID=" + this.connection.getSessionId() + "\" target=\"__blank\">" + nc + "</a></b>): " + pc.getArg(1) + "<br />");
+                writeToBuffer(pc.getArg(0), "NOTICE (<b><a href=\"/priv/" + nc + "/?PLACEBO_SESSIONID=" + this.connection.getSessionId() + "\" target=\"_blank\">" + nc + "</a></b>): " + pc.getArg(1) + "<br />");
             }
         }
         if (pc.is("JOIN"))
