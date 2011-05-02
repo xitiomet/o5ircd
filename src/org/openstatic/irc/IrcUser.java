@@ -134,7 +134,11 @@ public class IrcUser extends Thread
                             desired_channel.pendingJoin(this);
                         desired_channel.getHandler().onCommand(cmd);
                     } else if (cmd.is("JOIN")) {
-                        sendResponse("403", rooms[rms] + " :No IrcChannel Class to handle this request");
+                        IrcChannel chan = new IrcChannel(rooms[rms]);
+                        this.server.addChannel(chan);
+                        chan.pendingJoin(this);
+                        chan.getHandler().onCommand(cmd);
+                        //sendResponse("403", rooms[rms] + " :No IrcChannel Class to handle this request");
                     }
                 }
             }
