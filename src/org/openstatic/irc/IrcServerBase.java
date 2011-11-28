@@ -5,6 +5,7 @@ import org.openstatic.irc.IrcChannel;
 import org.openstatic.irc.gateways.IrcGateway;
 import org.openstatic.irc.gateways.WebGateway;
 import org.openstatic.irc.gateways.CLIGateway;
+import org.openstatic.irc.gateways.APIGateway;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,7 +21,8 @@ public class IrcServerBase
         System.err.println("");
         System.err.println("  --debug                        Turn debugging output on.");
         System.err.println("  --irc [port]                   Specify IRC listening port");
-        System.err.println("  --web [port]                   Start web administration on given port");
+        System.err.println("  --web [port]                   Start web gateway on given port");
+        System.err.println("  --api [port]                   Start api gateway on given port");
         System.err.println("  --complex-chan [ini]           Create a channel from an ini file");
         System.err.println("  --chan [channel name]          create chanel (can be used multiple times)");
         System.err.println("  --motd [file]                  specify the motd filename");
@@ -108,6 +110,15 @@ public class IrcServerBase
                     {
                         int web_port = Integer.valueOf(arg_p1).intValue();
                         irc.addGateway(new WebGateway(web_port));
+                    } catch (Exception wa) {}
+                }
+
+                if (arg.equals("--api") && arg_p1 != null)
+                {
+                    try
+                    {
+                        int api_port = Integer.valueOf(arg_p1).intValue();
+                        irc.addGateway(new APIGateway(api_port));
                     } catch (Exception wa) {}
                 }
                 

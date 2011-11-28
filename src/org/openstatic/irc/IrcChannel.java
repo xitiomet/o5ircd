@@ -404,6 +404,24 @@ public class IrcChannel implements MiddlewareHandler
         }
         return returnMembers.toString();
     }
+
+    public String[] getMemberStringArray()
+    {
+        Vector<String> returnMembers = new Vector<String>();
+        for (Enumeration<IrcUser> e = this.members.elements(); e.hasMoreElements(); )
+        {
+            IrcUser u = e.nextElement();
+            String nick = u.getNick();
+            if (hasMode(u, "o"))
+            {
+                nick = "@" + nick;
+            } else if (hasMode(u, "v")) {
+                nick = "+" + nick;
+            }
+            returnMembers.add(nick);
+        }
+        return returnMembers.toArray(new String[returnMembers.size()]);
+    }
     
     private boolean hasMode(IrcUser member, String mode)
     {
