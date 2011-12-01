@@ -3,6 +3,7 @@ package org.openstatic.irc.gateways;
 import org.openstatic.irc.GatewayConnection;
 import org.openstatic.irc.IrcUser;
 import org.openstatic.irc.IRCMessage;
+import org.openstatic.irc.IRCResponse;
 import java.net.Socket;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -139,19 +140,19 @@ public class IrcGatewayConnection extends Thread implements GatewayConnection
         this.ircUser.getIrcServer().log(this.clientHostname, 1, "IrcGatewayConnection Thread Exiting!");
     }
     
-    public void sendResponse(String response, String params)
+    public void sendResponse(IRCResponse response)
     {
-        socketWrite(":" + this.serverHostname + " " + response + " " + this.ircUser.getNick() + " " + params + "\r\n");
+        socketWrite(":" + this.serverHostname + " " + response.getResponseCode() + " " + this.ircUser.getNick() + " " + response.getData() + "\r\n");
     }
     
-    public void sendCommand(IRCMessage pc)
+    public void sendCommand(IRCMessage message)
     {
         String out = null;
-        if (pc.getSource() != null)
+        if (message.getSource() != null)
         {
-            out = ":" + pc.getSource() + " " + pc.toString() + "\r\n";
+            out = ":" + message.getSource() + " " + message.toString() + "\r\n";
         } else {
-            out = ":" + this.serverHostname + " " + pc.toString() + "\r\n";
+            out = ":" + this.serverHostname + " " + message.toString() + "\r\n";
         }
         socketWrite(out);
     }

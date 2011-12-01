@@ -2,17 +2,20 @@ package org.openstatic.irc.gateways;
 
 import org.openstatic.irc.GatewayConnection;
 import org.openstatic.irc.IRCMessage;
+import org.openstatic.irc.IRCResponse;
 import org.openstatic.irc.IrcServer;
 import org.openstatic.irc.IrcUser;
 import org.openstatic.irc.IrcChannel;
 import org.openstatic.http.HttpRequest;
 import org.openstatic.http.HttpResponse;
+import org.openstatic.http.InteractiveResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Vector;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Hashtable;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.net.URLEncoder;
 import org.json.*;
 
@@ -21,7 +24,8 @@ public class APIGatewayConnection extends Thread implements GatewayConnection
     private IrcServer ircServer;
     private IrcUser ircUser;
     private Hashtable<String, Integer> room_timeout;
-    private Vector<JSONObject> message_queue;
+    private LinkedBlockingQueue<JSONObject> message_queue;
+    private Vector<InteractiveResponse> ir_list;
     private int lastRequestDelay;
     private int timeout;
     private String clientHostname;
@@ -33,7 +37,9 @@ public class APIGatewayConnection extends Thread implements GatewayConnection
     {
         this.ircServer = ircServer;
         this.ircUser = new IrcUser(this.ircServer);
-        this.message_queue = new Vector<JSONObject>();
+        this.ircUser.setEcho(true);
+        this.message_queue = new LinkedBlockingQueue<JSONObject>();
+        this.ir_list = new Vector<InteractiveResponse>();
         this.ircUser.initGatewayConnection(this);
         this.ircServer.addUser(this.ircUser);
         this.clientHostname = client_ip;
@@ -43,10 +49,6 @@ public class APIGatewayConnection extends Thread implements GatewayConnection
         this.timeout = timeout;
         this.keep_running = true;
         this.token_id = token_id;
-    }
-    
-    public void run()
-    {
         Thread pingPong = new Thread()
         {
             public void run()
@@ -66,6 +68,10 @@ public class APIGatewayConnection extends Thread implements GatewayConnection
             }
         };
         pingPong.start();
+    }
+    
+    public void run()
+    {
         this.ircUser.getIrcServer().log(this.clientHostname, 1, "APIGatewayConnection Thread Exiting!");
     }
 
@@ -99,6 +105,19 @@ public class APIGatewayConnection extends Thread implements GatewayConnection
         this.ircUser.onGatewayCommand(imessage);
     }
 
+    public void handleMessage(IRCMessage imessage)
+    {
+        imessage.setSource(this.ircUser);
+        this.ircUser.onGatewayCommand(imessage);
+    }
+
+    public void rawCommand(String raw)
+    {
+        IRCMessage imessage = new IRCMessage(raw);
+        imessage.setSource(this.ircUser);
+        this.ircUser.onGatewayCommand(imessage);
+    }
+
     public String getTokenId()
     {
         return this.token_id;
@@ -112,6 +131,11 @@ public class APIGatewayConnection extends Thread implements GatewayConnection
     public int getDelay()
     {
         return this.lastRequestDelay;
+    }
+
+    public void resetPingRemaining()
+    {
+        this.lastRequestDelay = 0;
     }
 
     public int getPingRemaining()
@@ -139,31 +163,71 @@ public class APIGatewayConnection extends Thread implements GatewayConnection
         return this.ircUser;
     }
     
-    public void sendResponse(String response, String params)
+    public void addInteractiveResponse(InteractiveResponse ir)
     {
-        /*
+        this.ir_list.add(ir);
+    }
+
+    public void sendResponse(IRCResponse response)
+    {
         try
         {
-            JSONObject resp = new JSONObject();
-            resp.put("response", response);
-            resp.put("data", params);
-            this.message_queue.add(resp);
+            this.ircUser.getIrcServer().log(this.clientHostname, 5, "<- " + response.toString());
+            if (this.ir_list.size() > 0)
+            {
+                resetPingRemaining();
+                for (Enumeration<InteractiveResponse> e = this.ir_list.elements(); e.hasMoreElements(); )
+                {
+                    InteractiveResponse ir = e.nextElement();
+                    if (ir.isConnected())
+                        ir.push(response.toJSONObject());
+                    else
+                        this.ir_list.remove(ir);
+                }
+            } else {
+                this.message_queue.put(response.toJSONObject());
+            }
         } catch (Exception e) {
 
         }
-        */
     }
 
-    public void sendCommand(IRCMessage pc)
+    public void sendCommand(IRCMessage message)
     {
-        this.ircUser.getIrcServer().log(this.clientHostname, 5, "<- " + pc.toString());
-        this.message_queue.add(pc.toJSONObject());
+        try
+        {
+            this.ircUser.getIrcServer().log(this.clientHostname, 5, "<- " + message.toString());
+            if (this.ir_list.size() > 0)
+            {
+                resetPingRemaining();
+                for (Enumeration<InteractiveResponse> e = this.ir_list.elements(); e.hasMoreElements(); )
+                {
+                    InteractiveResponse ir = e.nextElement();
+                    if (ir.isConnected())
+                        ir.push(message.toJSONObject());
+                    else
+                        this.ir_list.remove(ir);
+                }
+            } else {
+                this.message_queue.put(message.toJSONObject());
+            }
+        } catch (Exception e) {
+            System.err.println(e.toString() + " / " + e.getMessage());
+            e.printStackTrace(System.err);
+        }
+    }
+
+    public JSONObject pollMessageQueue()
+    {
+        return this.message_queue.poll();
     }
 
     public JSONArray getMessageQueue()
     {
         JSONArray return_array = new JSONArray();
-        for(Enumeration<JSONObject> e = this.message_queue.elements(); e.hasMoreElements(); )
+        Vector<JSONObject> drain_results = new Vector<JSONObject>();
+        this.message_queue.drainTo(drain_results);
+        for(Enumeration<JSONObject> e = drain_results.elements(); e.hasMoreElements(); )
         {
             JSONObject jo = e.nextElement();
             return_array.put(jo);

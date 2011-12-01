@@ -358,7 +358,7 @@ public class IrcChannel implements MiddlewareHandler
             IRCMessage outbound_message = receivedCommand;
             if (receivedCommand.getArg(0).equals(this.channel_name))
             {
-                broadcast(outbound_message, false);
+                broadcast(outbound_message, u.shouldEcho());
             } else {
                 IrcUser intended_target = findMember(receivedCommand.getArg(0));
                 if (intended_target != null)

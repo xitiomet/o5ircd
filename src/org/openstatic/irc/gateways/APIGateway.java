@@ -4,6 +4,7 @@ import org.openstatic.irc.IrcServer;
 import org.openstatic.irc.IrcUser;
 import org.openstatic.irc.IrcChannel;
 import org.openstatic.irc.Gateway;
+import org.openstatic.irc.IRCMessage;
 
 import org.openstatic.http.*;
 
@@ -64,6 +65,17 @@ public class APIGateway extends Thread implements Gateway
         }
         return null;
     }
+
+    public APIGatewayConnection findClient(IrcUser u)
+    {
+        for(Enumeration<APIGatewayConnection> e = clients.elements(); e.hasMoreElements(); )
+        {
+            APIGatewayConnection ce = e.nextElement();
+            if (ce.getIrcUser() == u)
+                return ce;
+        }
+        return null;
+    }
     
     public void shutdownGateway()
     {
@@ -82,6 +94,7 @@ public class APIGateway extends Thread implements Gateway
         if (this.ircServer.getDebug() >= 10)
         {
             httpServer.setDebug(true);
+            httpServer.setShowData(true);
         }
         httpServer.setSessionVariable("token_id");
         httpServer.setSessionMode(PlaceboHttpServer.GET_SESSION);
@@ -121,7 +134,10 @@ public class APIGateway extends Thread implements Gateway
     public JSONObject doRequest(HttpRequest request) throws Exception
     {
         JSONObject response = new JSONObject();
-        String client_ip = request.getHttpHeader("X-Real-IP");
+        String client_ip = request.getClientHostname();
+        String x_real_ip = request.getHttpHeader("X-Real-IP");
+        if (x_real_ip != null)
+            client_ip = x_real_ip;
         String token_id = request.getGetValue("token_id");
         String timeout_string = request.getGetValue("timeout");
         int timeout = 60;
@@ -131,6 +147,8 @@ public class APIGateway extends Thread implements Gateway
         if (token_id != null)
         {
             connection = findClient(token_id);
+            if (connection != null)
+                connection.resetPingRemaining();
         }
 
         if (request.getPath().equals("/irc/connect/"))
@@ -138,18 +156,49 @@ public class APIGateway extends Thread implements Gateway
             if (token_id == null)
                 token_id = generateBigAlphaKey(15);
             String nickname = request.getGetValue("nick");
-            if (this.ircServer.findUser(nickname) == null)
+            String pass = request.getGetValue("password");
+            IrcUser existing_user = this.ircServer.findUser(nickname);
+            if (existing_user == null)
             {
                 connection = new APIGatewayConnection(this.ircServer, token_id, timeout, client_ip, request.getServerHostname());
+                //connection.start();
                 this.clients.add(connection);
-                connection.connect(nickname, request.getGetValue("password"));
+                connection.connect(nickname, pass);
                 response.put("token_id", token_id);
             } else {
-                response.put("error", "NICK_IN_USE");
+                APIGatewayConnection ec = findClient(existing_user);
+                if (ec != null)
+                {
+                    if (existing_user.checkPassword(pass))
+                    {
+                        response.put("token_id", ec.getTokenId());
+                    } else {
+                        response.put("error", "INVALID_PASSWORD");
+                    }
+
+                } else {
+                    response.put("error", "NICK_IN_USE");
+                }
             }
-        } else if (request.getPath().startsWith("/irc/queue/")) {
+        } else if (request.getPath().equals("/irc/queue/")) {
             if (connection != null)
                 response.put("events", connection.getMessageQueue());
+        } else if (request.getPath().equals("/irc/interactive/")) {
+            if (connection != null)
+            {
+                InteractiveResponse ir = new InteractiveResponse(request);
+                connection.addInteractiveResponse(ir);
+            }
+        } else if (request.getPath().equals("/irc/direct/")) {
+            if (connection != null)
+            {
+                connection.handleMessage(new IRCMessage(request.getJSONObjectPost()));
+            }
+        } else if (request.getPath().equals("/irc/raw/")) {
+            if (connection != null)
+            {
+                connection.rawCommand(request.getRawPost());
+            }
         } else if (request.getPath().startsWith("/irc/channel/")) {
             String channel_name = request.getPathArray()[2];
             IrcChannel channel = this.ircServer.findChannel(channel_name);
@@ -184,13 +233,13 @@ public class APIGateway extends Thread implements Gateway
                 }
             }
         } else {
-
+            response.put("error", "API_NOT_FOUND");
         }
         if (connection != null)
         {
-            response.put("ping_remaining", connection.getPingRemaining());
             response.put("nick", connection.getIrcUser().getNick());
         }
+        response.put("server", this.ircServer.getServerName());
         return response;
     }
     

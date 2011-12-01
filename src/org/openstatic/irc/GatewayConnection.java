@@ -7,6 +7,6 @@ public interface GatewayConnection
     public String getServerHostname();
     public String getClientHostname();
     public void close();
-    public void sendCommand(IRCMessage pc);
-    public void sendResponse(String response, String params);
+    public void sendCommand(IRCMessage message);
+    public void sendResponse(IRCResponse response);
 }

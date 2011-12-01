@@ -2,6 +2,7 @@ package org.openstatic.irc.gateways;
 
 import org.openstatic.irc.GatewayConnection;
 import org.openstatic.irc.IRCMessage;
+import org.openstatic.irc.IRCResponse;
 import org.openstatic.irc.IrcServer;
 import org.openstatic.irc.IrcUser;
 import org.openstatic.irc.IrcChannel;
@@ -323,7 +324,7 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
         this.connection.endSession();
     }
     
-    public void sendResponse(String response, String params)
+    public void sendResponse(IRCResponse response)
     {
         // Do Nothing
     }
@@ -371,43 +372,43 @@ public class WebGatewayConnection extends Thread implements GatewayConnection
         return return_data;
     }
     
-    public void sendCommand(IRCMessage pc)
+    public void sendCommand(IRCMessage message)
     {
-        this.ircUser.getIrcServer().log(this.clientHostname, 5, "<- " + pc.toString());
-        String nc = pc.getSourceNick();
-        if (pc.is("PRIVMSG"))
+        this.ircUser.getIrcServer().log(this.clientHostname, 5, "<- " + message.toString());
+        String nc = message.getSourceNick();
+        if (message.is("PRIVMSG"))
         {
-            if (pc.getArg(0).equals(this.ircUser.getNick()))
+            if (message.getArg(0).equals(this.ircUser.getNick()))
             {
-                writeToBuffer(nc, "<b>" + nc + "</b>: " + pc.getArg(1) + "<br />");
+                writeToBuffer(nc, "<b>" + nc + "</b>: " + message.getArg(1) + "<br />");
             } else {
-                writeToBuffer(pc.getArg(0), "<b><a href=\"/priv/" + nc + "/?PLACEBO_SESSIONID=" + this.connection.getSessionId() + "\" target=\"_blank\">" + nc + "</a></b>: " + pc.getArg(1) + "<br />");
+                writeToBuffer(message.getArg(0), "<b><a href=\"/priv/" + nc + "/?PLACEBO_SESSIONID=" + this.connection.getSessionId() + "\" target=\"_blank\">" + nc + "</a></b>: " + message.getArg(1) + "<br />");
             }
         }
-        if (pc.is("NOTICE"))
+        if (message.is("NOTICE"))
         {
-            if (pc.getArg(0).equals(this.ircUser.getNick()))
+            if (message.getArg(0).equals(this.ircUser.getNick()))
             {
-                writeToBuffer(nc, "NOTICE (<b>" + nc + "</b>): " + pc.getArg(1) + "<br />");
+                writeToBuffer(nc, "NOTICE (<b>" + nc + "</b>): " + message.getArg(1) + "<br />");
             } else {
-                writeToBuffer(pc.getArg(0), "NOTICE (<b><a href=\"/priv/" + nc + "/?PLACEBO_SESSIONID=" + this.connection.getSessionId() + "\" target=\"_blank\">" + nc + "</a></b>): " + pc.getArg(1) + "<br />");
+                writeToBuffer(message.getArg(0), "NOTICE (<b><a href=\"/priv/" + nc + "/?PLACEBO_SESSIONID=" + this.connection.getSessionId() + "\" target=\"_blank\">" + nc + "</a></b>): " + message.getArg(1) + "<br />");
             }
         }
-        if (pc.is("JOIN"))
+        if (message.is("JOIN"))
         {
-            writeToBuffer(pc.getArg(0), "<b style=\"color: #005500;\">*** " + nc + " Joined Channel :" + pc.getArg(0) + "</b><br />");
+            writeToBuffer(message.getArg(0), "<b style=\"color: #005500;\">*** " + nc + " Joined Channel :" + message.getArg(0) + "</b><br />");
         }
-        if (pc.is("PART"))
+        if (message.is("PART"))
         {
-            writeToBuffer(pc.getArg(0), "<b style=\"color: #550000;\">*** " + nc + " Left Channel :" + pc.getArg(0) + "</b><br />");
+            writeToBuffer(message.getArg(0), "<b style=\"color: #550000;\">*** " + nc + " Left Channel :" + message.getArg(0) + "</b><br />");
         }
-        if (pc.is("QUIT"))
+        if (message.is("QUIT"))
         {
-            writeToBuffer(pc.getArg(0), "<b style=\"color: #550000;\">*** " + nc + " QUIT IRC :" + pc.getArg(0) + "</b><br />");
+            writeToBuffer(message.getArg(0), "<b style=\"color: #550000;\">*** " + nc + " QUIT IRC :" + message.getArg(0) + "</b><br />");
         }
-        if (pc.is("TOPIC"))
+        if (message.is("TOPIC"))
         {
-            writeToBuffer(pc.getArg(0), "<b style=\"color: #000055;\">*** " + nc + " changed the topic to: " + pc.getArg(1) + "</b><br />");
+            writeToBuffer(message.getArg(0), "<b style=\"color: #000055;\">*** " + nc + " changed the topic to: " + message.getArg(1) + "</b><br />");
         }
     }
 }

@@ -10,6 +10,24 @@ public class IRCMessage
     protected String source;
     protected Vector<String> args;
     protected Vector<String> destination;
+    protected JSONObject meta;
+    public static final int PRIVMSG = 100;
+    public static final int MODE = 101;
+    public static final int JOIN = 102;
+    public static final int PART = 103;
+    public static final int INVITE = 104;
+    public static final int TOPIC = 105;
+    public static final int LIST = 106;
+    public static final int WHOIS = 107;
+    public static final int USER = 108;
+    public static final int NICK = 109;
+    public static final int WHO = 110;
+    public static final int AWAY = 111;
+    public static final int QUIT = 112;
+    public static final int NOTICE = 113;
+    public static final int PONG = 114;
+    public static final int ISON = 115;
+    public static final int PING = 116;
     
     // constructor
     public IRCMessage(String line)
@@ -27,15 +45,25 @@ public class IRCMessage
             this.args = doArgs(cmdArray,1);
         }
     }
+
+    public IRCMessage(int command)
+    {
+        this.cmd = getCommand(command);
+        this.args = new Vector<String>();
+        this.destination = null;
+    }
     
     public IRCMessage(JSONObject job) throws JSONException
     {
-        this.source = job.getString("source");
+        if (job.has("source"))
+            this.source = job.getString("source");
+        if (job.has("meta"))
+            this.meta = job.getJSONObject("meta");
         this.cmd = job.getString("command");
         this.args = new Vector<String>();
-        if (job.has("args"))
+        if (job.has("data"))
         {
-            JSONArray arguments = job.getJSONArray("args");
+            JSONArray arguments = job.getJSONArray("data");
             for (int a = 0; a < arguments.length(); a++)
             {
                 String c_arg = arguments.getString(a);
@@ -106,6 +134,47 @@ public class IRCMessage
         this.args = new Vector<String>();
     }
 
+    public static String getCommand(int command)
+    {
+        if (command == PRIVMSG)
+        {
+            return "PRIVMSG";
+        } else if (command == MODE) {
+            return "MODE";
+        } else if (command == JOIN) {
+            return "JOIN";
+        } else if (command == PART) {
+            return "PART";
+        } else if (command == INVITE) {
+            return "INVITE";
+        } else if (command == TOPIC) {
+            return "TOPIC";
+        } else if (command == LIST) {
+            return "LIST";
+        } else if (command == WHOIS) {
+            return "WHOIS";
+        } else if (command == USER) {
+            return "USER";
+        } else if (command == NICK) {
+            return "NICK";
+        } else if (command == WHO) {
+            return "WHO";
+        } else if (command == AWAY) {
+            return "AWAY";
+        } else if (command == QUIT) {
+            return "QUIT";
+        } else if (command == NOTICE) {
+            return "NOTICE";
+        } else if (command == PONG) {
+            return "PONG";
+        } else if (command == ISON) {
+            return "ISON";
+        } else if (command == PING) {
+            return "PING";
+        } else {
+            return null;
+        }
+    }
     
     // process that funny argument layout
     private Vector<String> doArgs(String[] ary, int start)
@@ -245,8 +314,8 @@ public class IRCMessage
     {
         return this.toString();
     }
-    
-    public String toString()
+
+    public String getData()
     {
         StringBuffer args_string = new StringBuffer("");
         for (Enumeration<String> e = args.elements(); e.hasMoreElements(); )
@@ -262,7 +331,12 @@ public class IRCMessage
                 args_string.append(" ");
             }
         }
-        return this.cmd + " " + args_string.toString();
+        return args_string.toString();
+    }
+    
+    public String toString()
+    {
+        return this.cmd + " " + this.getData();
     }
     
     // check to see if a command matches a string
@@ -324,7 +398,9 @@ public class IRCMessage
                 job.put("destination", this.destination);
             }
             job.put("command", this.getCommand());
-            job.put("args", this.args);
+            if (this.meta != null)
+                job.put("meta", this.meta);
+            job.put("data", this.args);
         } catch (Exception e) {}
         return job;
     }

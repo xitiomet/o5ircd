@@ -15,6 +15,7 @@ public class IrcUser extends Thread
     private boolean welcomed;
     private int idle_time;
     private boolean stay_connected;
+    private boolean echo_back;
     private IrcServer server;
     private GatewayConnection connection;
     
@@ -26,6 +27,7 @@ public class IrcUser extends Thread
         this.away_message = null;
         this.welcomed = false;
         this.server = server;
+        this.echo_back = false;
     }
         
     public void initGatewayConnection(GatewayConnection connection)
@@ -48,6 +50,16 @@ public class IrcUser extends Thread
         };
         idleClock.start();
         this.server.log(this.connection.getClientHostname(), 1, "IrcUser Class initGatewayConnection()");
+    }
+    
+    public void setEcho(boolean echo)
+    {
+        this.echo_back = echo;
+    }
+
+    public boolean shouldEcho()
+    {
+        return this.echo_back;
     }
     
     public void disconnect()
@@ -230,7 +242,10 @@ public class IrcUser extends Thread
                     {
                         sendResponse("301", possible_target2.getNick() + " :" + possible_target2.getAway());
                     }
-                    possible_target2.sendCommand(new IRCMessage(cmd, this));
+                    IRCMessage out_message = new IRCMessage(cmd, this);
+                    possible_target2.sendCommand(out_message);
+                    if (this.shouldEcho())
+                        this.sendCommand(out_message);
                 } else {
                     sendResponse("401", cmd.getArg(0) + " :No such nick/channel");
                 }
@@ -350,6 +365,24 @@ public class IrcUser extends Thread
     {
         return this.nickname;
     }
+
+    public String getPassword()
+    {
+        return this.password;
+    }
+
+    public boolean checkPassword(String pass)
+    {
+        if (pass != null)
+        {
+            if (pass.equals(this.password))
+                return true;
+            else
+                return false;
+        } else {
+            return false;
+        }
+    }
     
     public String getAway()
     {
@@ -397,10 +430,15 @@ public class IrcUser extends Thread
     {
         this.connection.sendCommand(pc);
     }
-    
-    public void sendResponse(String response, String args)
+
+    public void sendResponse(String resp_code, String data)
     {
-        this.connection.sendResponse(response, args);
+        this.connection.sendResponse(new IRCResponse(resp_code, data));
+    }
+    
+    public void sendResponse(IRCResponse response)
+    {
+        this.connection.sendResponse(response);
     }
     
     private void processUser(Vector<String> args)

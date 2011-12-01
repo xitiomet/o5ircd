@@ -4,6 +4,7 @@ import org.openstatic.irc.GatewayConnection;
 import org.openstatic.irc.IrcUser;
 import org.openstatic.irc.IrcChannel;
 import org.openstatic.irc.IRCMessage;
+import org.openstatic.irc.IRCResponse;
 import org.openstatic.irc.IrcServer;
 import java.net.Socket;
 import java.io.InputStream;
@@ -180,7 +181,7 @@ public class CLIGatewayConnection extends Thread implements GatewayConnection
                         this.println("notice [target] [msg]              Send a notice to target");
                         this.println("msg [target] [msg]                 Send a privmsg to target");
                         this.println("nick [target] [new nick]           Change somebodys nickname");
-                        this.println("drop [target]                      Remove target from server");
+                        this.println("drop [target]                      Remove target channel/user from server");
                         this.println("debug [0-10]                       Set the verbosity");
                         this.println("motd                               Show the message of the day");
                         this.println("inject [cmd] [src] [target] [msg]  Inject Irc Packet");
@@ -339,19 +340,19 @@ public class CLIGatewayConnection extends Thread implements GatewayConnection
 
     }
     
-    public void sendResponse(String response, String params)
+    public void sendResponse(IRCResponse response)
     {
-        socketWrite(response + " : " + params + "\r\n");
+        socketWrite(response.getResponseCode() + " : " + response.getData() + "\r\n");
     }
     
-    public void sendCommand(IRCMessage pc)
+    public void sendCommand(IRCMessage message)
     {
         String out = null;
-        if (pc.getSource() != null)
+        if (message.getSource() != null)
         {
-            out = ":" + pc.getSource() + " " + pc.toString() + "\r\n";
+            out = ":" + message.getSource() + " " + message.toString() + "\r\n";
         } else {
-            out = ":" + this.serverHostname + " " + pc.toString() + "\r\n";
+            out = ":" + this.serverHostname + " " + message.toString() + "\r\n";
         }
         socketWrite(out);
     }
